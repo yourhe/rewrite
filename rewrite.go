@@ -6,6 +6,7 @@ package rewrite
 import (
 	"bytes"
 	"errors"
+	"io"
 )
 
 var ErrNotFinished = errors.New("not finished")
@@ -15,6 +16,10 @@ var ErrNotFinished = errors.New("not finished")
 // not necessarily match, implementations *may* alter input bytes
 type Rewriter interface {
 	Rewrite(i []byte) (o []byte)
+}
+
+type RewriterStream interface {
+	RewriteStream(f io.Reader, t io.Writer) error
 }
 
 // RewriterType enumerates rewriters that operate on different
@@ -30,6 +35,7 @@ const (
 	RwTypeHtml
 	RwTypeJavascript
 	RwTypeCss
+	RwTypeScript
 )
 
 func (rwt RewriterType) String() string {
@@ -42,10 +48,12 @@ func (rwt RewriterType) String() string {
 		RwTypeHtml:       "html",
 		RwTypeJavascript: "javascript",
 		RwTypeCss:        "css",
+		RwTypeScript:     "script",
 	}[rwt]
 }
 
 var NoopRewriter = PrefixRewriter{}
+var DefaultCookieRewriter = CookieRewriter{}
 
 // PrefixRewriter adds a prefix if not present
 type PrefixRewriter struct {

@@ -31,7 +31,7 @@ func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
 		Prefix: c.HeaderPrefix,
 		Rules:  c.HeaderRules,
 		Urlrw:  c.Defmod,
-		// Cookierw: c.CookieRewriter,
+		// Cookierw: NewCookieRewriter(),
 		// RewritingContent: c.ContentRewriter != nil,
 	}
 }
@@ -39,8 +39,16 @@ func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
 func (hrw HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 	rewritten := http.Header{}
 	for key, _ := range headers {
-		newkey, newval := hrw.rewriteHeader(key, headers.Get(key))
-		rewritten.Add(newkey, newval)
+		if val, ok := headers[key]; ok && len(val) > 0 {
+			for _, v := range val {
+				newkey, newval := hrw.rewriteHeader(key, v)
+				rewritten.Add(newkey, newval)
+			}
+		}
+		// } else {
+		// 	newkey, newval := hrw.rewriteHeader(key, headers.Get(key))
+		// 	rewritten.Add(newkey, newval)
+		// }
 	}
 	return rewritten
 }
@@ -78,6 +86,7 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 		return hrw.Prefix + name, value
 	case Cookie:
 		if hrw.Cookierw != nil {
+			return name, string(hrw.Cookierw.Rewrite([]byte(value)))
 			//               return self.rwinfo.cookie_rewriter.rewrite(value)
 		}
 		return name, value

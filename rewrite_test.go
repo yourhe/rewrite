@@ -36,7 +36,7 @@ func testRewriteCases(t *testing.T, rw Rewriter, cases []rewriteTestCase) {
 				continue
 			}
 
-			t.Errorf("case %d mismatch:\n%s", i, dmp.DiffPrettyText(diffs))
+			t.Errorf("case %d mismatch:\n%s", i, dmp.DiffPrettyHtml(diffs))
 			if len(c.out) < 50 {
 				t.Errorf("expected: %s, got: %s", string(c.out), string(got))
 			}

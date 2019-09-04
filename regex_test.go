@@ -13,6 +13,7 @@ func TestCharsetRegex(t *testing.T) {
 func TestCssUrlRegex(t *testing.T) {
 	testRegexCases(t, CssUrlRegex, []reTestCase{
 		{"nothing", "", "nothing"},
+		{`.indexIcon{background: url("/page/images/serchIndexIcon.png") no-repeat center center;display: inline-block;}`, "abcd", "nothing"},
 	})
 }
 func TestCssImportNoUrlRegex(t *testing.T) {
@@ -23,6 +24,7 @@ func TestCssImportNoUrlRegex(t *testing.T) {
 func TestHttpxMatchString(t *testing.T) {
 	testRegexCases(t, HttpxMatchString, []reTestCase{
 		{"nothing", "", "nothing"},
+		{"http://login.wanfangdata.com.cn/showBindTip", "http://ttt.wanfangdata.com.cn", "b"},
 	})
 }
 

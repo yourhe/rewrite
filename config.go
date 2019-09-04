@@ -1,11 +1,13 @@
 package rewrite
 
 type Config struct {
-	DestUrl      string
-	Defmod       Rewriter
-	Rewriters    []RewriterType
-	HeaderPrefix string
-	HeaderRules  map[string]RewriteRule
+	DestUrl        string
+	Defmod         Rewriter
+	CookieRewriter Rewriter
+	Rewriters      []RewriterType
+	HeaderPrefix   string
+	HeaderRules    map[string]RewriteRule
+	RewritersMp    map[RewriterType]Rewriter
 }
 
 func DefaultConfig() *Config {
@@ -14,6 +16,10 @@ func DefaultConfig() *Config {
 		Defmod:       NoopRewriter,
 		HeaderPrefix: "X-Archive-Orig-",
 		HeaderRules:  DefaultHeaderRewriters,
+		// RewritersMp: map[string]Rewriter{
+		// 	"Defmod": NoopRewriter,
+		// 	// "CookieRewriter":
+		// },
 	}
 }
 

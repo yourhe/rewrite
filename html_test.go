@@ -1,6 +1,9 @@
 package rewrite
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"testing"
 )
 
@@ -13,6 +16,20 @@ func TestRewriteHtml(t *testing.T) {
 		{basicHtmlRewriteIn, basicHtmlRewriteOut},
 	})
 	testRewriteCases(t, rw, cases)
+}
+
+func TestRewriteReader_Read(t *testing.T) {
+	urlrw := NewUrlRewriter("http://a.com", "https://b.tv")
+	rw := NewHtmlRewriter(urlrw)
+	bf := bytes.NewBufferString(basicHtmlRewriteIn)
+	r := rw.NewReader(bf)
+	b, err := ioutil.ReadAll(r)
+	// b := make([]byte, 512)
+	// l, err := r.Read(b)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(string(b))
 }
 
 var htmlNoChange = `<!DOCTYPE html>
@@ -53,6 +70,7 @@ var basicHtmlRewriteIn = `<!DOCTYPE html>
     <frame src="/frame/src"></frame>
   </form>
   <link href="/link"></link>
+  <script src="http://a.com:8080/stuff/static/js/script.js"></script>
   <script src="/static/js/script.js"></script>
   <source src="/turn/left"></source>
   <video src="/yep" poster="poster"></video>
@@ -89,7 +107,8 @@ var basicHtmlRewriteOut = `<!DOCTYPE html>
     <frame src="fr_/frame/src"></frame>
   </form>
   <link href="oe_/link"></link>
-  <script src="js_/static/js/script.js"></script>
+  <script src="https://b.tv/stuff/static/js/script.js"></script>
+  <script src="/static/js/script.js"></script>
   <source src="oe_/turn/left"></source>
   <video src="oe_/yep" poster="im_poster"></video>
   <h3 href="http://a.com/stuff"></h3>

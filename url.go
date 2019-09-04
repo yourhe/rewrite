@@ -60,7 +60,6 @@ func (urw *UrlRewriter) Rewrite(p []byte) []byte {
 	if err != nil {
 		return p
 	}
-
 	if u.Host == urw.fromHost {
 		u.Host = urw.to.Host
 		if u.Scheme != urw.to.Scheme {
