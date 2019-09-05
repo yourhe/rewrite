@@ -32,7 +32,7 @@ func testRewriteCases(t *testing.T, rw Rewriter, cases []rewriteTestCase) {
 			dmp := dmp.New()
 			diffs := dmp.DiffMain(string(c.out), string(got), true)
 			if len(diffs) == 0 {
-				t.Logf("case %d bytes were unequal but computed no difference between results")
+				t.Logf("case %d bytes were unequal but computed no difference between results", len(diffs))
 				continue
 			}
 
