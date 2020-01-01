@@ -56,3 +56,12 @@ func TestHostRelativeUrlRewriter(t *testing.T) {
 	rw := NewHostRelativeUrlRewriter("http://a.com")
 	testRewriteCases(t, rw, cases)
 }
+
+func TestLetDigHOSTUrlRewriter(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://wanfangdata.com.cn", "http://wanfangdata-com-cn.pk.com"},
+	})
+
+	rw := NewLetDigHostUrlRewriter("http://wanfangdata.com.cn", "http://${host}.pk.com")
+	testRewriteCases(t, rw, cases)
+}

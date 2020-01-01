@@ -3,7 +3,10 @@ package rewrite
 import (
 	"bytes"
 	"net/url"
+	"strings"
 )
+
+const ReplaceHostFlag = "${host}"
 
 type UrlRewriter struct {
 	hostRelative bool
@@ -18,8 +21,35 @@ func NewUrlRewriter(from, to string) *UrlRewriter {
 		// TODO - ugh.
 		panic(err)
 	}
+	host := f.Host
+	host, port, vailded := VaildHTTPPort(host)
+	if vailded {
+		host = host + ".port-" + port
+	}
+	to = strings.Replace(to, ReplaceHostFlag, host, -1)
+	t, err := url.Parse(to)
+	if err != nil {
+		// TODO
+		panic(err)
+	}
+
+	return &UrlRewriter{
+		fromHost: f.Host,
+		to:       t,
+	}
+}
+
+func NewLetDigHostUrlRewriter(from, to string) *UrlRewriter {
+	f, err := url.Parse(from)
+	if err != nil {
+		// TODO - ugh.
+		panic(err)
+	}
+	host := ToLetDigHyp(f.Host)
+	to = strings.Replace(to, ReplaceHostFlag, host, -1)
 
 	t, err := url.Parse(to)
+
 	if err != nil {
 		// TODO
 		panic(err)
@@ -55,7 +85,6 @@ func (urw *UrlRewriter) Rewrite(p []byte) []byte {
 	if len(p) == 0 {
 		return nil
 	}
-
 	u, err := urw.to.Parse(string(p))
 	if err != nil {
 		return p

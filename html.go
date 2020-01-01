@@ -3,9 +3,10 @@ package rewrite
 import (
 	"bytes"
 	"io"
+	// "io/ioutil"
 	"regexp"
 	"strconv"
-
+	"fmt"
 	"golang.org/x/net/html"
 )
 
@@ -56,24 +57,18 @@ func (hrw *HtmlRewriter) Rewrite(p []byte) []byte {
 }
 
 func (hrw *HtmlRewriter) rewrite(rdr io.Reader, ww io.Writer) error {
-	// rdr := bytes.NewReader(p)
-
+	// fmt.Println("HtmlRewriter",rdr,ww)
+	// bs,err := ioutil.ReadAll(rdr)
+	// fmt.Println(string(bs)[:100],err)
+	// r := bytes.NewReader(bs)
+	// tokenizer := html.NewTokenizer(r)
 	tokenizer := html.NewTokenizer(rdr)
-	// w := &bytes.Buffer{}
-	// var token html.Token
 	var isScript bool
 
 	for {
 		tt := tokenizer.Next()
-		// token := tokenizer.Token()
 		switch tt {
-		// case html.TextToken:
-		// case html.CommentToken:
 		case html.ErrorToken:
-
-			// ErrorToken means that an error occurred during tokenization.
-			// most common is end-of-file (EOF)
-
 			if tokenizer.Err().Error() == "EOF" {
 				return nil
 			}
@@ -114,25 +109,7 @@ func (hrw *HtmlRewriter) rewrite(rdr io.Reader, ww io.Writer) error {
 
 		}
 		ww.Write(tokenizer.Raw())
-		// fmt.Println(string(tokenizer.Text()))
-		// b := tokenizer.Raw()
-		// if len(b) < 4096 {
-		// 	ww.Write(b)
-		// 	continue
-		// }
-
-		// buf := bytes.NewBuffer(b)
-		// for {
-		// 	b := buf.Next(4096)
-		// 	if len(b) == 0 {
-		// 		break
-		// 	}
-		// 	ww.Write(b)
-		// }
-		// w.WriteString(token.String())
-
 	}
-
 	return nil
 }
 
@@ -161,18 +138,10 @@ func (hrw *HtmlRewriter) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 	return
 }
 
-// func (hrw *HtmlRewriter) rewriteJSToken(t *html.Token, tok *html.Tokenizer) {
-// 	if t.Data == "script" {
-// 		tok.NextIsNotRawText()
-// 	}
-// }
-
 func rewriteTags(defmod Rewriter) map[string]map[string]Rewriter {
 	oe := PrefixRewriter{Prefix: []byte("oe_")}
 	im := PrefixRewriter{Prefix: []byte("im_")}
-	// if_ := PrefixRewriter{Prefix: []byte("if_")}
 	fr_ := PrefixRewriter{Prefix: []byte("fr_")}
-	// js_ := PrefixRewriter{Prefix: []byte("js_")}
 
 	return map[string]map[string]Rewriter{
 		"a":          {"href": defmod},
@@ -352,6 +321,7 @@ func (r *RewriteReader) Read(p []byte) (n int, err error) {
 			Data: string(name),
 		}
 		if hasAttr {
+			fmt.Println(token)
 			r.htmlrw.rewriteToken(&token, tokenizer)
 		}
 		tkstring := String(token)
