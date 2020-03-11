@@ -23,6 +23,11 @@ func DefaultConfig() *Config {
 	}
 }
 
+func SetCookieRewriter(cookiesRW Rewriter) func(cfg *Config) {
+	return func(cfg *Config) {
+		cfg.CookieRewriter = cookiesRW
+	}
+}
 func makeConfig(configs ...func(*Config)) *Config {
 	cfg := DefaultConfig()
 	for _, config := range configs {

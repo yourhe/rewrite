@@ -1,8 +1,10 @@
 package rewrite
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type RewriteRule int
@@ -23,6 +25,7 @@ type HeaderRewriter struct {
 	Urlrw            Rewriter
 	Cookierw         Rewriter
 	RewritingContent bool
+	req              *http.Request
 }
 
 func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
@@ -31,17 +34,22 @@ func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
 		Prefix: c.HeaderPrefix,
 		Rules:  c.HeaderRules,
 		Urlrw:  c.Defmod,
-		// Cookierw: NewCookieRewriter(),
+		// Cookierw: c.CookieRewriter,
 		// RewritingContent: c.ContentRewriter != nil,
 	}
 }
-
-func (hrw HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
+func (hrw *HeaderRewriter) SetRequest(r *http.Request) {
+	hrw.req = r
+}
+func (hrw *HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 	rewritten := http.Header{}
 	for key, _ := range headers {
 		if val, ok := headers[key]; ok && len(val) > 0 {
 			for _, v := range val {
+				fmt.Println(key, v)
 				newkey, newval := hrw.rewriteHeader(key, v)
+				fmt.Println(newkey, newval)
+
 				rewritten.Add(newkey, newval)
 			}
 		}
@@ -54,6 +62,15 @@ func (hrw HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 }
 
 func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
+	if name == "Location" {
+		// ？？？如果没有http，补充主RequestURI？
+		if !strings.HasPrefix(value, "http") {
+			u, err := hrw.req.URL.Parse(value)
+			if err == nil {
+				value = u.String()
+			}
+		}
+	}
 	switch hrw.Rules[name] {
 	case Keep:
 		return name, value

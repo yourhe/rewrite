@@ -31,6 +31,7 @@ func TestHttpxMatchString(t *testing.T) {
 func TestJsHttpx(t *testing.T) {
 	testRegexCases(t, JsHttpx, []reTestCase{
 		{"nothing", "", "nothing"},
+		{"notahing", "", "nothing"},
 	})
 }
 

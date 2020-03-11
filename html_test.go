@@ -11,18 +11,21 @@ func TestRewriteHtml(t *testing.T) {
 	urlrw := NewUrlRewriter("http://a.com", "https://b.tv")
 	rw := NewHtmlRewriter(urlrw)
 	cases := stringTestCases([]stringTestCase{
-		{"", ""},
+		// {"", ""},
 		{htmlNoChange, htmlNoChange},
-		{basicHtmlRewriteIn, basicHtmlRewriteOut},
+		// {basicHtmlRewriteIn, basicHtmlRewriteOut},
 	})
 	testRewriteCases(t, rw, cases)
 }
 
 func TestRewriteReader_Read(t *testing.T) {
-	urlrw := NewUrlRewriter("http://a.com", "https://b.tv")
+	urlrw := NewUrlRewriter("http://a.com:90", "https://b.tv")
 	rw := NewHtmlRewriter(urlrw)
-	bf := bytes.NewBufferString(basicHtmlRewriteIn)
+
+	// bf := bytes.NewBufferString(basicHtmlRewriteIn)
+	bf := bytes.NewBufferString(htmlNoChange)
 	r := rw.NewReader(bf)
+	r.AddInsert("head", "<base></base>", true)
 	b, err := ioutil.ReadAll(r)
 	// b := make([]byte, 512)
 	// l, err := r.Read(b)
@@ -36,18 +39,25 @@ var htmlNoChange = `<!DOCTYPE html>
 <html>
 <head>
   <title></title>
+  <head></head>
 </head>
 <body>
+<script type="text/javascript">
+    $(function(){
+        function anxsGetCookie(name){
+            var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+</script>
 </body>
 </html>`
 
-var basicHtmlRewriteIn = `<!DOCTYPE html>
+var basicHTMLRewriteIn = `<!DOCTYPE html>
 <html>
 <head>
   <title></title>
   <meta></meta>
 </head>
 <body background="background">
+<div><a></a><div id=2><a/></div></div>
   <a href="/apples" nochange="leave/me/alone">link</a>
   <applet codebase="http://a.com/codebase" archive="http://appletarchive.com"></applet>
   <area href="http://a.com/path" />
@@ -70,7 +80,7 @@ var basicHtmlRewriteIn = `<!DOCTYPE html>
     <frame src="/frame/src"></frame>
   </form>
   <link href="/link"></link>
-  <script src="http://a.com:8080/stuff/static/js/script.js"></script>
+  <script src="http://a.com:8080/stuff/static/js/script.js">afadfaf</script>
   <script src="/static/js/script.js"></script>
   <source src="/turn/left"></source>
   <video src="/yep" poster="poster"></video>
@@ -108,7 +118,7 @@ var basicHtmlRewriteOut = `<!DOCTYPE html>
   </form>
   <link href="oe_/link"></link>
   <script src="https://b.tv/stuff/static/js/script.js"></script>
-  <script src="/static/js/script.js"></script>
+  <script src="/static/js/script.js">adadfaf</script>
   <source src="oe_/turn/left"></source>
   <video src="oe_/yep" poster="im_poster"></video>
   <h3 href="http://a.com/stuff"></h3>
