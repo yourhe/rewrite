@@ -1,7 +1,6 @@
 package rewrite
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -46,10 +45,7 @@ func (hrw *HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 	for key, _ := range headers {
 		if val, ok := headers[key]; ok && len(val) > 0 {
 			for _, v := range val {
-				fmt.Println(key, v)
 				newkey, newval := hrw.rewriteHeader(key, v)
-				fmt.Println(newkey, newval)
-
 				rewritten.Add(newkey, newval)
 			}
 		}
@@ -75,8 +71,10 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 	case Keep:
 		return name, value
 	case UrlRewrite:
+
 		if hrw.Urlrw != nil {
-			return name, string(hrw.Urlrw.Rewrite([]byte(value)))
+			v := hrw.Urlrw.Rewrite([]byte(value))
+			return name, string(v)
 		}
 		return name, value
 	case PrefixIfContentRewrite:

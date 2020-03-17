@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 
 	// "io/ioutil"
 
@@ -126,6 +127,9 @@ func (hrw *HtmlRewriter) rewriteMetaRefresh(p []byte, metaRefresh *regexp.Regexp
 }
 
 func (hrw *HtmlRewriter) rewriteToken(t *html.Token, tok *html.Tokenizer) {
+	if hrw.rewriteTags == nil {
+		return
+	}
 	attrs := hrw.rewriteTags[t.Data]
 	for {
 		key, oldval, more := tok.TagAttr()
@@ -253,7 +257,9 @@ func tagBuffer(t html.Token) *bytes.Buffer {
 		buf.WriteByte(' ')
 		buf.WriteString(a.Key)
 		buf.WriteString(`="`)
-		buf.WriteString(a.Val)
+		// buf.WriteString(a.Val)
+		buf.WriteString(html.EscapeString(a.Val))
+
 		// escape(buf, a.Val)
 		buf.WriteByte('"')
 	}
@@ -310,12 +316,34 @@ func AddInsert(i insert) ReaderOption {
 	}
 }
 
+type match struct {
+	key     string
+	value   *string
+	regex   *regexp.Regexp
+	rewrite Rewriter
+}
+
+type matcher struct {
+	matchs []match
+}
+
+type AttrRewriter map[string]matcher
+
+type AttrsRewriter struct {
+	AttrRewriter
+}
+
+type TagsRewriter map[string][]matcher
+
 type RewriteReader struct {
-	tokenizer *html.Tokenizer
-	r         io.Reader
-	htmlrw    *HtmlRewriter
-	stack     *Stack
-	inserts   []insert
+	tokenizer    *html.Tokenizer
+	r            io.Reader
+	htmlRewriter *HtmlRewriter
+	stack        *Stack
+	inserts      []insert
+	tagTable     TagsRewriter
+	buf          *bytes.Buffer
+	jsRewriter   *JavaScriptRewrite
 }
 
 type insert struct {
@@ -325,14 +353,19 @@ type insert struct {
 	matched bool
 }
 
-// NewReader 接受一个reader返回TokenReader
+// NewRewriteReader 接受一个reader返回TokenReader
 // in -> Response.Body.(io.ReadCloser)
 // out -> HtmlRewriter.(io.Reader)
 func NewRewriteReader(r io.Reader, opts ...ReaderOption) *RewriteReader {
-	tokenizer := html.NewTokenizer(r)
+	var tokenizer *html.Tokenizer
+	if r != nil {
+		tokenizer = html.NewTokenizer(r)
+	}
 	rr := &RewriteReader{
 		tokenizer: tokenizer,
 		stack:     NewStack(),
+		tagTable:  make(TagsRewriter),
+		buf:       bytes.NewBuffer(nil),
 	}
 	// handler opts ....
 	for _, opt := range opts {
@@ -341,54 +374,296 @@ func NewRewriteReader(r io.Reader, opts ...ReaderOption) *RewriteReader {
 	return rr
 }
 
+func (rr *RewriteReader) SetJavascriptRewriter(jsRewriter *JavaScriptRewrite) io.Reader {
+	rr.jsRewriter = jsRewriter
+	return rr
+}
+
+func (rr *RewriteReader) NewReader(r io.Reader) io.Reader {
+	rr.tokenizer = html.NewTokenizer(r)
+	return rr
+}
+
 func (r *RewriteReader) SetHtmlRewriter(hrw *HtmlRewriter) *RewriteReader {
-	r.htmlrw = hrw
+	r.htmlRewriter = hrw
 	return r
 }
 
+func readAttrName(src string) (name string, regex *regexp.Regexp) {
+	name = src
+	i := strings.Index(src, "/")
+	if i > -1 {
+		name = src[:i]
+		j := strings.LastIndex(src, "/")
+		rgStr := src[i+1 : j]
+		regex = regexp.MustCompile(rgStr)
+	}
+	return
+}
+
+func (r *RewriteReader) SetTagRewriter(query, attrName string, rw Rewriter) *RewriteReader {
+	if query == "" || attrName == "" || rw == nil {
+		return r
+	}
+	attrName, regex := readAttrName(attrName)
+	if r.tagTable == nil {
+		r.tagTable = map[string][]matcher{}
+	}
+
+	matchs := []match{match{key: attrName, rewrite: rw, regex: regex}}
+	var tagName = query
+	i := strings.Index(query, "[")
+	if i > -1 {
+		j := strings.LastIndex(query, "]")
+		if j > -1 {
+			tagName = query[:i]
+			expr := query[i+1 : j]
+			parts := strings.Split(expr, "=")
+			key := strings.TrimSpace(parts[0])
+			var val *string
+			if len(parts) > 1 {
+				v := strings.TrimSpace(parts[1])
+				if v[0] == '"' || v[0] == '\'' {
+					v = v[1 : len(v)-1]
+				}
+				val = &v
+			}
+			matchs = append(matchs, match{
+				key:   key,
+				value: val,
+			})
+		}
+
+	}
+
+	r.tagTable[tagName] = append(r.tagTable[tagName], matcher{
+		matchs: matchs,
+	})
+
+	// r.tagTable[tagName] = &AttrsRewriter{
+	// 	AttrRewriter: AttrRewriter{
+	// 		attrName: matcher{key: attrName, rewrite: rw},
+	// 	},
+	// }
+	// r.tagTable[tagName].AttrRewriter
+	return r
+}
 func (r *RewriteReader) AddInsert(name, value string, once bool) *RewriteReader {
 	r.inserts = append(r.inserts, insert{Name: name, Value: value, NotOnce: !once})
 	return r
 }
+func (r *RewriteReader) stackToBuf() {
+
+	for {
+		s := r.stack.Pop()
+		if s == nil {
+			break
+		}
+
+		if r.buf == nil {
+			r.buf = bytes.NewBufferString(s.(string))
+		} else {
+			r.buf.WriteString(s.(string))
+		}
+	}
+
+}
 
 //Read implmement io.Reader interface , that can support stream
 func (r *RewriteReader) Read(p []byte) (n int, err error) {
+
+loop:
 	tokenizer := r.tokenizer
 	tt := tokenizer.Next()
-	if tt == html.ErrorToken {
-		return 0, tokenizer.Err()
-	}
+
 	var raw []byte
 	switch tt {
-	// case html.ErrorToken:
-	// 	return 0, tokenizer.Err()
+	case html.ErrorToken:
+		r.stackToBuf()
+		// r.buf.Write([]byte{0})
+		return r.buf.Read(p)
+		// return 0, tokenizer.Err()
+		// return 0, io.EOF
 	case html.StartTagToken, html.SelfClosingTagToken:
+
+		var token html.Token
 		name, hasAttr := tokenizer.TagName()
-		token := html.Token{
+		token = html.Token{
 			Type: tt,
 			Data: string(name),
 		}
 		if hasAttr {
-			r.htmlrw.rewriteToken(&token, tokenizer)
+			r.rewriteToken(&token, tokenizer)
 		}
+
 		r.waitTagTokenClose(token, "script")
 		raw = r.processInsert(token)
+		r.buf.Write(raw)
+
 		// raw = r.insert(token, "head", "<base href='http://www.baidu.com'></base>")
 
 	case html.EndTagToken:
 		token := tokenizer.Token()
 		raw = r.waitTagTokenClose(token, "script")
+		r.buf.Write(raw)
 
 	default:
+
 		token := tokenizer.Token()
 		raw = r.waitTagTokenClose(token, "script")
+		r.buf.Write(raw)
 
 	}
+	if len(raw) == 0 {
+		goto loop
+	}
 
-	n = copy(p, raw)
-	return n, nil
+	return r.buf.Read(p)
+	// n = copy(p, raw)
+	// return n, nil
 }
 
+func (r *RewriteReader) getTagRewriter(tagName string, attrName []byte) Rewriter {
+	if tagName == "" || len(attrName) == 0 {
+		return nil
+	}
+	attrName = (bytes.ToLower(attrName))
+	tag := r.tagTable[tagName]
+
+	if tag == nil {
+		return nil
+	}
+	return nil
+	// return tag[string(attrName)]
+
+}
+
+func (r *RewriteReader) queryTags(token *html.Token) (rewriter *match, idx int) {
+	tag := r.tagTable[token.Data]
+	if tag == nil {
+		return nil, -1
+	}
+
+	for _, tagMatchs := range tag {
+		var matched = make([]bool, len(tagMatchs.matchs))
+		for i, matcher := range tagMatchs.matchs {
+			for j, attr := range token.Attr {
+
+				if attr.Key != matcher.key {
+					continue
+				}
+
+				if matcher.value != nil {
+					if attr.Val != *matcher.value {
+						continue
+					}
+				}
+				if matcher.rewrite != nil {
+
+					rewriter = &tagMatchs.matchs[i]
+
+					idx = j
+				}
+				matched[i] = true
+				var e = true
+				for _, b := range matched {
+					e = e && b
+				}
+				if e {
+					return
+				}
+			}
+
+		}
+	}
+	return nil, -1
+}
+
+func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
+	// attrs := hrw.rewriteTags[t.Data]
+	for {
+
+		key, val, more := tok.TagAttr()
+		if len(key) > 0 {
+
+			t.Attr = append(t.Attr, html.Attribute{
+				Key: string(key),
+				Val: string(val),
+			})
+		}
+		if !more {
+			break
+		}
+	}
+
+	match, i := r.queryTags(t)
+
+	if match != nil && i > -1 {
+		repl := match.rewrite
+		if repl == nil {
+			return
+		}
+		val := []byte(t.Attr[i].Val)
+		newVal := val
+		if match.regex != nil {
+			findpart := match.regex.Copy().FindSubmatchIndex(val)
+			if len(findpart) > 0 {
+				i := findpart[2]
+				j := findpart[3]
+				bf := bytes.NewBuffer(val[:i])
+				bf.Write(repl.Rewrite(val[i:j]))
+				bf.Write(val[j:])
+				newVal = bf.Bytes()
+
+			}
+
+		} else {
+			newVal = repl.Rewrite(val)
+		}
+		fmt.Printf("%s,%s\n", newVal, val)
+		if bytes.Compare(newVal, val) != 0 {
+			t.Attr[i].Val = string(newVal)
+			t.Attr = append(t.Attr, html.Attribute{
+				Key: "__cpp",
+				Val: "1",
+			})
+			t.Attr = append(t.Attr, html.Attribute{
+				Key: "__dp",
+				Val: "1",
+			})
+		}
+	}
+	return
+	for {
+		key, oldval, more := tok.TagAttr()
+		var newVal []byte
+		repl := r.getTagRewriter(t.Data, key)
+		// repl := attrs[string(bytes.ToLower(key))]
+		if repl != nil {
+			newVal = repl.Rewrite(oldval)
+		}
+		if newVal == nil {
+			newVal = oldval
+		}
+
+		t.Attr = append(t.Attr, html.Attribute{
+			Key: string(key),
+			Val: string(newVal),
+		})
+
+		if bytes.Compare(newVal, oldval) != 0 {
+			t.Attr = append(t.Attr, html.Attribute{
+				Key: "__cpp",
+				Val: "1",
+			})
+		}
+
+		if !more {
+			return
+		}
+	}
+	return
+}
 func (r *RewriteReader) isScript(tz html.Token) bool {
 	n := tz.Data
 	return r.isMatchTagName(n, RwTypeCss.String())
@@ -426,7 +701,8 @@ func (r *RewriteReader) getRawData(tz html.Token) (raw []byte) {
 	if r.stack.Len() > 0 {
 		return nil
 	}
-	return bytes.NewBufferString(tz.String()).Bytes()
+	return bytes.NewBufferString(String(tz)).Bytes()
+	// return bytes.NewBufferString(tz.String()).Bytes()
 }
 func (r *RewriteReader) processInsert(tz html.Token) (raw []byte) {
 	if len(r.inserts) < 1 {
@@ -449,7 +725,7 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 	if r.isMatchTagName(tz.Data, tagName) {
 		switch tz.Type {
 		case html.StartTagToken:
-			r.stack.Push(tz.String())
+			r.stack.Push(String(tz))
 			break
 		case html.EndTagToken:
 			last, ok := r.stack.Pop().(string)
@@ -457,10 +733,10 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 			var bs *bytes.Buffer
 			if ok {
 				bs = bytes.NewBufferString(last)
-				bs.WriteString(tz.String())
+				bs.WriteString(String(tz))
 
 			} else {
-				bs = bytes.NewBufferString(tz.String())
+				bs = bytes.NewBufferString(String(tz))
 			}
 
 			if r.stack.Len() == 0 {
@@ -478,15 +754,21 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 
 	} else {
 		if r.stack.Len() > 0 {
+
 			last, _ := r.stack.Pop().(string)
 			bs := bytes.NewBufferString(last)
 			// bs.WriteString(tz.String())
 			switch tz.Type {
 			case html.TextToken:
-				bs.WriteString(tz.Data)
+				if tagName == "script" && r.jsRewriter != nil {
+					jsBuf := bytes.NewReader([]byte(tz.Data))
+					r.jsRewriter.NewReader(jsBuf)
+					io.Copy(bs, r.jsRewriter)
+				} else {
+					bs.WriteString(tz.Data)
+				}
 			default:
-				bs.WriteString(tz.String())
-
+				bs.WriteString(String(tz))
 			}
 			r.stack.Push(bs.String())
 		}
@@ -497,9 +779,10 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 	}
 	switch tz.Type {
 	case html.TextToken:
+
 		raw = bytes.NewBufferString(tz.Data).Bytes()
 	default:
-		raw = bytes.NewBufferString(tz.String()).Bytes()
+		raw = bytes.NewBufferString(String(tz)).Bytes()
 
 	}
 	return

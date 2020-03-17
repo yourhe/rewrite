@@ -117,9 +117,47 @@ func TestWwwSinomedAcCnUrlsinRewriter(t *testing.T) {
 func TestWOSUrlsinRewriter(t *testing.T) {
 	cases := stringTestCases([]stringTestCase{
 		{"http://www.webofknowledge.com?", "http://www.webofknowledge.com.wf"},
+		{"http://www.webofknowledge.com?", "http://www.webofknowledge.com.wf"},
 	})
 
 	rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
 	rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases)
+}
+
+func TestWOSNewUrlsinRewriter(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://.www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
+		{"https://www.webofknowledge.com?", "https://www.webofknowledge.com.wf?__dp=https"},
+		{"http://www.webofknowledge.com:84?", "https://www.webofknowledge.com.wf?__dp=http|84"},
+		{"//www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
+		{"/a/b?", "/a/b?"},
+		{"a/b?", "a/b?"},
+		{"../a/b?", "../a/b?"},
+		{"http://images.drcnet-sod.com/javascript/jquery.min.js", "../a/b?"},
+	})
+	rw := NewURLRewriter("https://www.webofknowledge.com.wf/abc/d", "wf", "https", true, 0)
+	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
+	// rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases)
+}
+
+func TestWOSNewUrlsinSWRRewriter(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://www.webofknowledge.com?", "https://wf/--/com/webofknowledge/www/_"},
+		{"http://www.webofknowledge.com/a?", "https://wf/--/com/webofknowledge/www/_/a"},
+		{"https://www.webofknowledge.com?a=b", "https://wf/--/com/webofknowledge/www/_?a=b&__dp=https"},
+		{"/a/b?", "https://wf/--/com/webofknowledge/www/_/a/b?__dp=https"},
+		{"a/b?", "https://wf/--/com/webofknowledge/www/_/abc/a/b?__dp=https"},
+		{"/../a/b?", "https://wf/--/com/webofknowledge/www/_/../a/b?__dp=https"},
+		// {"http://jggw.cnki.net/sso/home/check?returnurl=http%3A%2F%2Fjggw.cnki.net%2FODCC&timestamp=1584241472.59793&appid=odcc_81&sign=ba51d40cdc4817122c8dd5cd3b79974d8e2074ed", ""},
+		{"../images/gb/icon-d.gif", "https://wf/--/com/webofknowledge/www/_/images/gb/icon-d.gif?__dp=https"},
+		{"images/gb/icon-d.gif", "https://wf/--/com/webofknowledge/www/_/abc/images/gb/icon-d.gif?__dp=https"},
+		{"?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&", ""},
+		{"javascript:__doPostBack('Button1','')", "javascript:__doPostBack('Button1','')"},
+	})
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/a?s", "wf", "https", true, 1)
+	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
+	// rw.ProtocolOnQuery(true)
 	testRewriteCases(t, rw, cases)
 }

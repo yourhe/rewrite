@@ -27,6 +27,13 @@ func (ur *UrlRewriter) PortOnQuery(on bool) {
 func (ur *UrlRewriter) ProtocolOnQuery(on bool) {
 	ur.protocolOnQuery = on
 }
+
+// func NewUrlRewriter2(from, to string) *UrlRewriter {
+// 	return &UrlRewriter{
+// 		fromHostName: from,
+// 		to:           to,
+// 	}
+// }
 func NewUrlRewriter(from, to string) *UrlRewriter {
 	f, err := url.Parse(from)
 	if err != nil {
@@ -184,12 +191,6 @@ func (urw *UrlRewriter) Rewrite(p []byte) []byte {
 		u.SetHost(urw.to.Host)
 		u.SetScheme(urw.to.Scheme)
 	}
-
-	// if we're rewriting to relative urls, ensure
-	// empty rewrites to root
-	// if urw.to.Host == "" && u.Path == "" {
-	// 	u.Path = "/"
-	// }
 
 	// relative urls should be "directory relative"
 	if len(u.Host()) == 0 {
