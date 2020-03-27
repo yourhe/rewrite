@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 var headTags = []string{"html", "head", "base", "link", "meta", "title", "style", "script", "object", "bgsound"}
@@ -28,24 +29,27 @@ type HtmlRewriter struct {
 	rewriteTags   map[string]map[string]Rewriter
 	r             io.Reader
 	inserts       []insert
+	transfrom     *Transform
 	// rewriters     map[RewriterType]Rewriter
 }
 
 func NewHtmlRewriter(urlrw Rewriter, configs ...func(*Config)) *HtmlRewriter {
-	// c := makeConfig(configs...)
+	c := makeConfig(configs...)
 	return &HtmlRewriter{
 		urlrw: urlrw,
 		// jsRewriter:  c.Rewriters[RwTypeJavascript],
 		rewriteTags: rewriteTags(urlrw),
+		transfrom:   c.Transform,
 	}
 }
 
 func NewHtmlJSRewriter(urlrw Rewriter, jsrw Rewriter, configs ...func(*Config)) *HtmlRewriter {
-	// c := makeConfig(configs...)
+	c := makeConfig(configs...)
 	return &HtmlRewriter{
 		urlrw:       urlrw,
 		jsRewriter:  jsrw,
 		rewriteTags: rewriteTags(urlrw),
+		transfrom:   c.Transform,
 	}
 }
 
@@ -69,6 +73,7 @@ func (hrw *HtmlRewriter) rewrite(rdr io.Reader, ww io.Writer) error {
 	r := hrw.NewReader(rdr)
 	_, err := io.Copy(ww, r)
 	return err
+
 	tokenizer := html.NewTokenizer(rdr)
 	// tokenizer := html.NewTokenizerFragment(rdr, "head")
 	var isScript bool
@@ -116,7 +121,6 @@ func (hrw *HtmlRewriter) rewrite(rdr io.Reader, ww io.Writer) error {
 			isScript = false
 
 		}
-		fmt.Println("tokenizer.Raw()", string(tokenizer.Raw()))
 		ww.Write(tokenizer.Raw())
 	}
 	return nil
@@ -257,9 +261,7 @@ func tagBuffer(t html.Token) *bytes.Buffer {
 		buf.WriteByte(' ')
 		buf.WriteString(a.Key)
 		buf.WriteString(`="`)
-		// buf.WriteString(a.Val)
 		buf.WriteString(html.EscapeString(a.Val))
-
 		// escape(buf, a.Val)
 		buf.WriteByte('"')
 	}
@@ -305,6 +307,11 @@ func (hrw *HtmlRewriter) NewReader(r io.Reader) *RewriteReader {
 
 type ReaderOption func(*RewriteReader)
 
+func SetTransform(transform *Transform) ReaderOption {
+	return func(r *RewriteReader) {
+		r.transform = transform
+	}
+}
 func SetHtmlRewriter(htmlrw *HtmlRewriter) ReaderOption {
 	return func(rr *RewriteReader) {
 		rr.SetHtmlRewriter(htmlrw)
@@ -344,6 +351,9 @@ type RewriteReader struct {
 	tagTable     TagsRewriter
 	buf          *bytes.Buffer
 	jsRewriter   *JavaScriptRewrite
+	transform    *Transform
+	eof          bool
+	outreader    io.Reader
 }
 
 type insert struct {
@@ -357,29 +367,49 @@ type insert struct {
 // in -> Response.Body.(io.ReadCloser)
 // out -> HtmlRewriter.(io.Reader)
 func NewRewriteReader(r io.Reader, opts ...ReaderOption) *RewriteReader {
-	var tokenizer *html.Tokenizer
-	if r != nil {
-		tokenizer = html.NewTokenizer(r)
-	}
+	// var tokenizer *html.Tokenizer
+
 	rr := &RewriteReader{
-		tokenizer: tokenizer,
-		stack:     NewStack(),
-		tagTable:  make(TagsRewriter),
-		buf:       bytes.NewBuffer(nil),
+		// tokenizer: tokenizer,
+		stack:    NewStack(),
+		tagTable: make(TagsRewriter),
+		buf:      bytes.NewBuffer(nil),
 	}
 	// handler opts ....
 	for _, opt := range opts {
 		opt(rr)
 	}
+	// if r != nil {
+	// 	if rr.transform != nil {
+	// 		rr.tokenizer = html.NewTokenizer(rr.transform.NewReader(r))
+	// 	} else {
+	// 		rr.tokenizer = html.NewTokenizer(r)
+
+	// 	}
+	// }
+	rr.NewReader(r)
 	return rr
 }
 
 func (rr *RewriteReader) SetJavascriptRewriter(jsRewriter *JavaScriptRewrite) io.Reader {
 	rr.jsRewriter = jsRewriter
+
 	return rr
 }
-
+func (rr *RewriteReader) Reset() {
+	rr.buf = bytes.NewBuffer(nil)
+}
 func (rr *RewriteReader) NewReader(r io.Reader) io.Reader {
+	if r == nil {
+		return rr
+	}
+	rr.Reset()
+
+	if rr.transform != nil {
+		r = rr.transform.NewDecodeReader(r)
+		rr.outreader = rr.transform.NewEncodeReader(rr.buf)
+	}
+
 	rr.tokenizer = html.NewTokenizer(r)
 	return rr
 }
@@ -468,6 +498,42 @@ func (r *RewriteReader) stackToBuf() {
 	}
 
 }
+func (r *RewriteReader) read(p []byte) (n int, err error) {
+	if r.eof && r.buf.Len() == 0 {
+		return 0, io.EOF
+	}
+	if r.outreader != nil {
+		return r.outreader.Read(p)
+	}
+
+	// if r.transform != nil {
+
+	// 	lr := io.LimitReader(r.buf, 4096)
+	// 	er := r.transform.NewEncodeReader(lr)
+
+	// 	i := 0
+	// 	for {
+	// 		n, err := er.Read(p[i:])
+	// 		i += n
+	// 		if err != nil || i >= len(p) {
+	// 			break
+	// 		}
+
+	// 	}
+	// 	return i, nil
+
+	// }
+	n, err = r.buf.Read(p)
+	// if r.buf.Len() != 0 {
+	// 	fmt.Printf("buf:%d, read:%d\n", r.buf.Len(), n)
+
+	// }
+	return n, nil
+}
+
+func hasAttr(token *html.Token) bool {
+	return len(token.Attr) > 0
+}
 
 //Read implmement io.Reader interface , that can support stream
 func (r *RewriteReader) Read(p []byte) (n int, err error) {
@@ -475,29 +541,23 @@ func (r *RewriteReader) Read(p []byte) (n int, err error) {
 loop:
 	tokenizer := r.tokenizer
 	tt := tokenizer.Next()
-
 	var raw []byte
 	switch tt {
 	case html.ErrorToken:
 		r.stackToBuf()
-		// r.buf.Write([]byte{0})
-		return r.buf.Read(p)
-		// return 0, tokenizer.Err()
+		r.eof = true
+		return r.read(p)
 		// return 0, io.EOF
 	case html.StartTagToken, html.SelfClosingTagToken:
 
-		var token html.Token
-		name, hasAttr := tokenizer.TagName()
-		token = html.Token{
-			Type: tt,
-			Data: string(name),
-		}
-		if hasAttr {
+		var token html.Token = tokenizer.Token()
+
+		if hasAttr(&token) {
 			r.rewriteToken(&token, tokenizer)
 		}
 
 		r.waitTagTokenClose(token, "script")
-		raw = r.processInsert(token)
+		raw = r.processInsert(token, tokenizer)
 		r.buf.Write(raw)
 
 		// raw = r.insert(token, "head", "<base href='http://www.baidu.com'></base>")
@@ -518,7 +578,7 @@ loop:
 		goto loop
 	}
 
-	return r.buf.Read(p)
+	return r.read(p)
 	// n = copy(p, raw)
 	// return n, nil
 }
@@ -581,20 +641,20 @@ func (r *RewriteReader) queryTags(token *html.Token) (rewriter *match, idx int) 
 
 func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 	// attrs := hrw.rewriteTags[t.Data]
-	for {
+	// for {
 
-		key, val, more := tok.TagAttr()
-		if len(key) > 0 {
+	// 	key, val, more := tok.TagAttr()
+	// 	if len(key) > 0 {
 
-			t.Attr = append(t.Attr, html.Attribute{
-				Key: string(key),
-				Val: string(val),
-			})
-		}
-		if !more {
-			break
-		}
-	}
+	// 		t.Attr = append(t.Attr, html.Attribute{
+	// 			Key: string(key),
+	// 			Val: string(val),
+	// 		})
+	// 	}
+	// 	if !more {
+	// 		break
+	// 	}
+	// }
 
 	match, i := r.queryTags(t)
 
@@ -620,7 +680,7 @@ func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 		} else {
 			newVal = repl.Rewrite(val)
 		}
-		fmt.Printf("%s,%s\n", newVal, val)
+
 		if bytes.Compare(newVal, val) != 0 {
 			t.Attr[i].Val = string(newVal)
 			t.Attr = append(t.Attr, html.Attribute{
@@ -697,22 +757,44 @@ func (r *RewriteReader) insert(tz html.Token, name, value string) (raw []byte, m
 	raw = bs.Bytes()
 	return
 }
-func (r *RewriteReader) getRawData(tz html.Token) (raw []byte) {
+
+func (r *RewriteReader) getRawData(tz *html.Tokenizer) (raw []byte) {
 	if r.stack.Len() > 0 {
 		return nil
 	}
-	return bytes.NewBufferString(String(tz)).Bytes()
+	return tz.Raw() // bytes.NewBufferString(String(tz)).Bytes()
 	// return bytes.NewBufferString(tz.String()).Bytes()
 }
-func (r *RewriteReader) processInsert(tz html.Token) (raw []byte) {
-	if len(r.inserts) < 1 {
-		return r.getRawData(tz)
+func (r *RewriteReader) getRawDataFromToken(tk html.Token) (raw []byte) {
+	if r.stack.Len() > 0 {
+		return nil
 	}
+	return bytes.NewBufferString(String(tk)).Bytes()
+	// return bytes.NewBufferString(tz.String()).Bytes()
+}
+func (r *RewriteReader) processInsert(tz html.Token, tokenizer *html.Tokenizer) (raw []byte) {
+	// tz := tokenizer.Token()
+	if len(r.inserts) < 1 {
+		return r.getRawDataFromToken(tz)
+	}
+	// fmt.Println(tokenizer.Token())
+	// tz =
 	for i, insert := range r.inserts {
 		// if !insert.NotOnce && insert.matched {
 		// 	continue
 		// }
 		rr, matched := r.insert(tz, insert.Name, insert.Value)
+		// 如果没有发现head标签，在满足当前标签条件下insert
+		if !matched &&
+			insert.Name == atom.Head.String() &&
+			(tz.DataAtom == atom.Link ||
+				tz.DataAtom == atom.Script ||
+				tz.DataAtom == atom.Style ||
+				tz.DataAtom == atom.Meta) {
+			matched = true
+			raw = []byte(insert.Value)
+		}
+
 		if !insert.NotOnce && matched {
 			r.inserts[i].matched = matched
 			r.inserts = append(r.inserts[:i], r.inserts[i+1:]...)
@@ -762,6 +844,7 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 			case html.TextToken:
 				if tagName == "script" && r.jsRewriter != nil {
 					jsBuf := bytes.NewReader([]byte(tz.Data))
+					fmt.Println(tz.Data)
 					r.jsRewriter.NewReader(jsBuf)
 					io.Copy(bs, r.jsRewriter)
 				} else {

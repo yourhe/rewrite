@@ -9,9 +9,10 @@ import (
 )
 
 type JavaScriptRewrite struct {
-	err    error
-	buf    *bufio.Reader
-	walker io.Reader
+	err       error
+	buf       *bufio.Reader
+	walker    io.Reader
+	transform Transform
 }
 
 func NewJavaScriptRewrite() *JavaScriptRewrite {

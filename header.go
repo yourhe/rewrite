@@ -40,6 +40,7 @@ func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
 func (hrw *HeaderRewriter) SetRequest(r *http.Request) {
 	hrw.req = r
 }
+
 func (hrw *HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 	rewritten := http.Header{}
 	for key, _ := range headers {

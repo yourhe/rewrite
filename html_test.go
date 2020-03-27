@@ -3,7 +3,9 @@ package rewrite
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"reflect"
 	"testing"
@@ -98,6 +100,84 @@ func TestRewriteMetaContent(t *testing.T) {
 	fmt.Println(string(b), err)
 }
 
+func TestRewriteTransform(t *testing.T) {
+	var raw = "<div>Hello \xb3\xa3\xd3\xc3\x87\xf8\xd7\xd6\x98\xcb\x9c\xca\xd7\xd6\xf3\x77\xb1\xed</div>"
+	f := bytes.NewBufferString(raw)
+	r := NewRewriteReader(f, SetTransform(&Transform{
+		Encoding: "gbk",
+	}))
+	urlRewrite := NewURLRewriter("http://x.cnki.net", "iyoerhe.com", "https", true, 1)
+	r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, `content/\d+; URL=(.+)/`, urlRewrite)
+	r.SetTagRewriter(`a`, "href", urlRewrite)
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(raw) != len(b) {
+		t.Error("error", string(b))
+	}
+	// fmt.Println(string(raw))
+}
+
+func TestImageData(t *testing.T) {
+	// resp, _ := http.Get("http://d.drcnet.com.cn/eDRCnet.common.web/DocDetail.aspx?docid=5764920&leafid=208&chnId=611")
+	f, _ := os.Open("./testdata/d.html")
+	// bs, _ := ioutil.ReadAll(resp.Body)
+	defer f.Close()
+	r := NewRewriteReader(f, SetTransform(&Transform{
+		// Encoding: "gbk",
+	}))
+	var b []byte
+	// r.SetTagRewriter(`img`, "src", urlRewrite)
+
+	// fe := DetermineEncoding("text/html; charset=gb2312")
+	// r := fe.NewDecodeReader(f)
+	// b, _ := ioutil.ReadAll(r)
+	// r = fe.NewEncodeWriter(bytes.NewReader(b))
+	b, _ = ioutil.ReadAll(r)
+	// fmt.Println(string(b), err)
+	ioutil.WriteFile("./testdata/d3.html", b, os.ModePerm)
+}
+
+func TestBdCnkiNetData(t *testing.T) {
+	f, _ := os.Open("./testdata/bd.cnki.net.html")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	r.AddInsert("head", `<link></link>`, true)
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+}
+
+func TestChaoxingQikan(t *testing.T) {
+	f, _ := os.Open("./testdata/chaoxing_qikan.html")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	urlRewrite := NewURLRewriter("http://x.cnki.net", "iyoerhe.com", "https", true, 1)
+	r.SetTagRewriter(`img`, "src", urlRewrite)
+	// r.AddInsert("head", `<link></link>`, true)
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+}
+func TestWwebofknowledgeData(t *testing.T) {
+	resp, err := http.Get("http://login.webofknowledge.com/error/Error?Error=IPError&PathInfo=%2F&RouterURL=http%3A%2F%2Fwww.webofknowledge.com%2F&Domain=.webofknowledge.com&Src=IP&Alias=WOK5")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var f io.ReadCloser
+	f = resp.Body
+	defer f.Close()
+	r := NewRewriteReader(f, SetTransform(&Transform{
+		// Encoding: "gbk",
+	}))
+	r.SetJavascriptRewriter(NewJavaScriptRewrite())
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	ioutil.WriteFile("./testdata/webofknowledge.html", b, os.ModePerm)
+}
+
+// http://login.webofknowledge.com/error/Error?Error=IPError&PathInfo=%2F&RouterURL=http%3A%2F%2Fwww.webofknowledge.com%2F&Domain=.webofknowledge.com&Src=IP&Alias=WOK5
 var htmlNoChange = `<!DOCTYPE html>
 <html>
 <head>

@@ -206,7 +206,6 @@ func (urw *UrlRewriter) Rewrite(p []byte) []byte {
 	if hasSlash(p) {
 		return uri
 	}
-	fmt.Println(string(uri), ",", string(u.LastPathSegment()))
 	if len(u.LastPathSegment()) > 1 {
 		return uri
 	}

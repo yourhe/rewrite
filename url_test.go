@@ -153,8 +153,10 @@ func TestWOSNewUrlsinSWRRewriter(t *testing.T) {
 		// {"http://jggw.cnki.net/sso/home/check?returnurl=http%3A%2F%2Fjggw.cnki.net%2FODCC&timestamp=1584241472.59793&appid=odcc_81&sign=ba51d40cdc4817122c8dd5cd3b79974d8e2074ed", ""},
 		{"../images/gb/icon-d.gif", "https://wf/--/com/webofknowledge/www/_/images/gb/icon-d.gif?__dp=https"},
 		{"images/gb/icon-d.gif", "https://wf/--/com/webofknowledge/www/_/abc/images/gb/icon-d.gif?__dp=https"},
-		{"?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&", ""},
+		{"?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&", "https://wf/--/com/webofknowledge/www/_/abc/a?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&&__dp=https"},
 		{"javascript:__doPostBack('Button1','')", "javascript:__doPostBack('Button1','')"},
+		{"javascript:__doPostBack('Button1','')", "javascript:__doPostBack('Button1','')"},
+		{"&#xA;                    http://doi.cnki.net/doi/Resolution/Handler?doi= 10.1016/j.bbapap.2020.140410", ""},
 	})
 	rw := NewURLRewriter("https://www.webofknowledge.com/abc/a?s", "wf", "https", true, 1)
 	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")

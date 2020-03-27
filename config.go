@@ -8,6 +8,7 @@ type Config struct {
 	HeaderPrefix   string
 	HeaderRules    map[string]RewriteRule
 	RewritersMp    map[RewriterType]Rewriter
+	Transform      *Transform
 }
 
 func DefaultConfig() *Config {
@@ -46,3 +47,9 @@ func makeRewriters(cfg *Config) map[RewriterType]Rewriter {
 
 	return rws
 }
+
+// func SetTransform(transform Transform) func(cfg *Config) {
+// 	return func(cfg *Config) {
+// 		cfg.Transform = &transform
+// 	}
+// }
