@@ -27,8 +27,9 @@ func NewURLRewriter(baseURI, host, protocol string, protocolOnQuery bool, mode i
 }
 
 func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
-	p = bytes.Trim(p, "&#xD;")
-	p = bytes.Trim(p, "&#xA;")
+	p = bytes.TrimPrefix(p, []byte("&#xD;"))
+	p = bytes.TrimPrefix(p, []byte("&#xA;"))
+	// p = bytes.Trim(p, "&#xA;")
 	p = bytes.TrimSpace(p)
 	if len(p) == 0 {
 		return p
