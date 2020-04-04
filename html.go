@@ -2,7 +2,6 @@ package rewrite
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"strings"
 
@@ -323,6 +322,8 @@ func AddInsert(i insert) ReaderOption {
 	}
 }
 
+type TagsRewriter map[string][]matcher
+
 type match struct {
 	key     string
 	value   *string
@@ -339,8 +340,6 @@ type AttrRewriter map[string]matcher
 type AttrsRewriter struct {
 	AttrRewriter
 }
-
-type TagsRewriter map[string][]matcher
 
 type RewriteReader struct {
 	tokenizer    *html.Tokenizer
@@ -727,8 +726,6 @@ func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 func (r *RewriteReader) isScript(tz html.Token) bool {
 	n := tz.Data
 	return r.isMatchTagName(n, RwTypeCss.String())
-	// fmt.Println(string(n), RwTypeScript.String(), bytes.Compare(n, []byte(RwTypeScript.String())))
-	// return bytes.Compare(n, []byte(RwTypeScript.String())) == 0
 }
 func (r *RewriteReader) isMatchTagName(a, b string) bool {
 	return a == b
@@ -777,8 +774,6 @@ func (r *RewriteReader) processInsert(tz html.Token, tokenizer *html.Tokenizer) 
 	if len(r.inserts) < 1 {
 		return r.getRawDataFromToken(tz)
 	}
-	// fmt.Println(tokenizer.Token())
-	// tz =
 	for i, insert := range r.inserts {
 		// if !insert.NotOnce && insert.matched {
 		// 	continue
@@ -844,7 +839,6 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 			case html.TextToken:
 				if tagName == "script" && r.jsRewriter != nil {
 					jsBuf := bytes.NewReader([]byte(tz.Data))
-					fmt.Println(tz.Data)
 					r.jsRewriter.NewReader(jsBuf)
 					io.Copy(bs, r.jsRewriter)
 				} else {
