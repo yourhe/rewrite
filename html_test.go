@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -88,13 +89,17 @@ func TestCnkiHome(t *testing.T) {
 
 func TestRewriteMetaContent(t *testing.T) {
 	var raw = `<meta http-equiv="REFRESH" href="http://www.baidu.com" content="0; URL=https://x.cnki.net/search">
+	<meta http-equiv="REFRESH" content="0; URL=https://dx.doi.org/10.1108/09685220310468628"/> 
+	<meta http-equiv="refresh" content="0;URL=&#39;https://dx.doi.org/10.1108/09685220310468628&#39;"/>    
+
   <a href="https://www.baidu.com">a</a>
   `
 	f := bytes.NewBufferString(raw)
 	r := NewRewriteReader(f)
-	urlRewrite := NewURLRewriter("http://x.cnki.net", "iyoerhe.com", "https", true, 1)
+	urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 1)
 	// r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, "href", urlRewrite)
-	r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, `content/\d+; URL=(.+)/`, urlRewrite)
+	r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, `content/\d+;\s?URL=["']?(.+)["']?/`, urlRewrite)
+	r.SetTagRewriter(`meta[http-equiv="refresh"]`, `content/\d+;\s?URL=['"](.+)["']/`, urlRewrite)
 	r.SetTagRewriter(`a`, "href", urlRewrite)
 	b, err := ioutil.ReadAll(r)
 	fmt.Println(string(b), err)
@@ -138,17 +143,69 @@ func TestImageData(t *testing.T) {
 	// fmt.Println(string(b), err)
 	ioutil.WriteFile("./testdata/d3.html", b, os.ModePerm)
 }
+func TestDubBasetData(t *testing.T) {
+	f, _ := os.Open("./testdata/hasBase.html")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	urw := NewURLRewriterRelativePath("https://abc.com/detail/dd", "wf", "https", true, 0)
+	r.htmlRewriter = NewHtmlRewriter(nil)
+	r.SetTagRewriter(`link`, "href", urw)
+	r.SetTagRewriter(`script`, "src", urw)
 
+	r.AddInsertAfter("head", `<base href="http://abc.com/detail/d"></base>`, true)
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+	// for key, val := range r.tagTable {
+	// 	// fmt.Println(key)
+	// 	for _, val := range val {
+	// 		fmt.Println(val.matchs[0].rewrite)
+	// 	}
+	// }
+
+}
+
+func TestIpubXML(t *testing.T) {
+	f, _ := os.Open("./testdata/ipub.xml")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	urw := NewURLRewriterRelativePath("http://abc.com/detail/dd", "wf", "https", true, 0)
+	r.htmlRewriter = NewHtmlRewriter(nil)
+	r.SetTagRewriter(`link`, "href", urw)
+
+	r.AddInsertAfter("head", `<base href="http://abc.com/detail/d"></base>`, true)
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+	// for key, val := range r.tagTable {
+	// 	// fmt.Println(key)
+	// 	for _, val := range val {
+	// 		fmt.Println(val.matchs[0].rewrite)
+	// 	}
+	// }
+
+}
 func TestBdCnkiNetData(t *testing.T) {
 	f, _ := os.Open("./testdata/bd.cnki.net.html")
 	defer f.Close()
 	r := NewRewriteReader(f)
-	r.AddInsert("head", `<link></link>`, true)
+	r.AddInsert("head", `<lin1eak></l1ink>`, true)
+	r.AddInsert("head", `<li2nk></li2nk>`, true)
 	var b []byte
 	b, _ = ioutil.ReadAll(r)
 	fmt.Println(string(b))
 }
+func TestInsertAfterBdCnkiNetData(t *testing.T) {
+	f, _ := os.Open("./testdata/bd.cnki.net.html")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	r.AddInsert("head", `<linak></link>`, true)
 
+	r.AddInsertAfter("head", `<liadnk></liacnk>`, true)
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+}
 func TestChaoxingQikan(t *testing.T) {
 	f, _ := os.Open("./testdata/chaoxing_qikan.html")
 	defer f.Close()
@@ -267,3 +324,27 @@ var basicHTMLRewriteOut = `<!DOCTYPE html>
   <h3 href="http://a.com/stuff"></h3>
 </body>
 </html>`
+
+func Test(t *testing.T) {
+	var testdata = "asdf2019年阿斯顿发顺丰大叔分10点， 2月1日asdf, 5月6日, 2019-04-05"
+	var stack []rune
+	// var start int
+	// var end int
+	for _, ch := range testdata {
+		if IsDig(ch) {
+			stack = append(stack, ch)
+			continue
+		}
+		// fmt.Println(string(stack))
+		stack = []rune{}
+	}
+	r := regexp.MustCompile("(\\d{2,4}[年|-])?\\d{1,2}[月|-](\\d{1,2}日?)?")
+
+	fmt.Println(r.FindAllIndex([]byte(testdata), -1))
+	fmt.Println(string(stack))
+
+}
+
+func IsDig(char rune) bool {
+	return char > 47 && char < 58
+}

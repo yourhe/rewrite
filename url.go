@@ -158,7 +158,6 @@ func (urw *UrlRewriter) Rewrite(p []byte) []byte {
 
 	var u fasthttp.URI
 	u.Parse(nil, p)
-
 	u.DisablePathNormalizing = true
 	if urw.protocolOnQuery {
 		protocol := FormatProtocol(&u)

@@ -1,9 +1,12 @@
 package rewrite
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/valyala/fasthttp"
 )
 
 type RewriteRule int
@@ -16,6 +19,9 @@ const (
 	PrefixIfContentRewrite
 	ContentLength
 	Cookie
+	Subfix
+	StrictTransportSecurity
+	AccessControlAllowOrigin
 )
 
 type HeaderRewriter struct {
@@ -74,7 +80,10 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 	case UrlRewrite:
 
 		if hrw.Urlrw != nil {
+			fmt.Println(name, value)
 			v := hrw.Urlrw.Rewrite([]byte(value))
+			fmt.Println(name, string(v))
+
 			return name, string(v)
 		}
 		return name, value
@@ -108,6 +117,32 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 		return name, value
 	case Prefix:
 		return hrw.Prefix + name, value
+	case Subfix:
+		return "XX-" + name + "-Report-Only", "default-src 'self' *;"
+	case StrictTransportSecurity:
+		return "Strict-Transport-Security", "max-age=0; includeSubDomains"
+	case AccessControlAllowOrigin:
+		if value == "*" {
+			return name, value
+		}
+		if hrw.Urlrw != nil {
+			v := hrw.Urlrw.Rewrite([]byte(value))
+			uri := fasthttp.AcquireURI()
+			uri.Parse(nil, v)
+			uri.SetPathBytes(nil)
+			uri.SetQueryStringBytes(nil)
+			vv := uri.FullURI()
+			if vv[len(vv)-1] == '/' {
+				vv = vv[:len(vv)-1]
+			}
+			value = string(vv)
+			fasthttp.ReleaseURI(uri)
+			return name, value
+		}
+
+		// only from www.emerald.com
+
+		return name + "GGG", "*"
 	}
 	return name, value
 }
@@ -116,7 +151,7 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 // }
 
 var DefaultHeaderRewriters = map[string]RewriteRule{
-	"Access-Control-Allow-Origin":      PrefixIfUrlRewrite,
+	"Access-Control-Allow-Origin":      AccessControlAllowOrigin,
 	"Access-Control-Allow-Credentials": PrefixIfUrlRewrite,
 	"Access-Control-Expose-Headers":    PrefixIfUrlRewrite,
 	"Access-Control-Max-Age":           PrefixIfUrlRewrite,
@@ -143,7 +178,7 @@ var DefaultHeaderRewriters = map[string]RewriteRule{
 	"Content-Location":                    UrlRewrite,
 	"Content-Md5":                         Prefix,
 	"Content-Range":                       Keep,
-	"Content-Security-Policy":             Prefix,
+	"Content-Security-Policy":             Subfix,
 	"Content-Security-Policy-Report-Only": Prefix,
 	"Content-Type":                        Keep,
 
@@ -167,7 +202,7 @@ var DefaultHeaderRewriters = map[string]RewriteRule{
 
 	"Set-Cookie": Cookie,
 
-	"Strict-Transport-Security": Prefix,
+	"Strict-Transport-Security": StrictTransportSecurity,
 
 	"Trailer":           Prefix,
 	"Transfer-Encoding": Prefix,

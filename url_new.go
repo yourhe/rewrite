@@ -8,12 +8,13 @@ import (
 )
 
 type URLRewriter struct {
-	baseURI         string
-	host            string
-	protocol        string
-	protocolOnQuery bool
-	mode            int
-	err             error
+	baseURI             string
+	host                string
+	protocol            string
+	protocolOnQuery     bool
+	mode                int
+	err                 error
+	processRelativePath bool
 }
 
 func NewURLRewriter(baseURI, host, protocol string, protocolOnQuery bool, mode int) *URLRewriter {
@@ -25,7 +26,16 @@ func NewURLRewriter(baseURI, host, protocol string, protocolOnQuery bool, mode i
 		mode:            mode,
 	}
 }
-
+func NewURLRewriterRelativePath(baseURI, host, protocol string, protocolOnQuery bool, mode int) *URLRewriter {
+	return &URLRewriter{
+		baseURI:             baseURI,
+		host:                host,
+		protocol:            protocol,
+		protocolOnQuery:     protocolOnQuery,
+		mode:                mode,
+		processRelativePath: true,
+	}
+}
 func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
 	p = bytes.TrimPrefix(p, []byte("&#xD;"))
 	p = bytes.TrimPrefix(p, []byte("&#xA;"))
@@ -38,18 +48,23 @@ func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
 	originHost := []byte(urw.host)
 	originProtocol := []byte(urw.protocol)
 	baseURI := []byte(urw.baseURI)
+
 	switch {
 	case urw.mode == 1:
 		prr := newPathReduceRewriteReader(originHost, originProtocol, baseURI, p)
 		bf := bytes.NewBuffer(nil)
 		_, err := io.Copy(bf, prr)
+
 		if err != nil {
 			urw.err = err
 		}
 		return bf.Bytes()
 	default:
 		drr := newDomainRewriteReader(originHost, originProtocol, baseURI, p)
+		drr.ProcessRelativePath = urw.processRelativePath
+		drr.NotSetProtocolOnQuery = !urw.protocolOnQuery
 		bf := bytes.NewBuffer(nil)
+
 		_, err := io.Copy(bf, drr)
 		if err != nil {
 			urw.err = err
@@ -82,6 +97,7 @@ type BytesName []byte
 var UnRewriteTable = []BytesName{
 	BytesName("javascript:"),
 	BytesName("data:"),
+	BytesName("#"),
 }
 
 func (prr *pathReduceRewriteReader) read(p []byte) (n int, err error) {
@@ -92,22 +108,18 @@ func (prr *pathReduceRewriteReader) read(p []byte) (n int, err error) {
 }
 func (prr *pathReduceRewriteReader) Read(p []byte) (n int, err error) {
 	if len(prr.src) == 0 {
-		// return prr.buf.Read(p)
 		return 0, io.EOF
-		// return copy(p, prr.src), io.EOF
-
 	}
 	if prr.buf != nil {
 		return prr.read(p)
 	}
+
 	for _, n := range UnRewriteTable {
 		if len(prr.src) < len(n) {
 			continue
 		}
 		if bytes.Index(bytes.ToLower(prr.src[:len(n)]), n) == 0 {
-			// prr.buf.w
-			// return prr.buf.Write(p)
-			// fmt.Println(string(prr.src), len(p))
+
 			if prr.buf == nil {
 				prr.buf = bytes.NewBuffer(prr.src)
 			}
@@ -131,14 +143,13 @@ func (prr *pathReduceRewriteReader) Read(p []byte) (n int, err error) {
 			switch u.PathOriginal()[0] {
 			case '/':
 			default:
-				return copy(p, prr.src), io.EOF
+				if prr.buf == nil {
+					prr.buf = bytes.NewBuffer(prr.src)
+				}
+
+				return prr.read(p)
 			}
-			// i := bytes.LastIndexByte(u2.PathOriginal(), '/')
-			// if i > -1 {
-			// 	p := u2.PathOriginal()[:i+1]
-			// 	u.SetPathBytes(append(p, u.PathOriginal()...))
-			// 	u.SetPathBytes(u.Path())
-			// }
+
 		} else {
 			u.SetPathBytes(u2.PathOriginal())
 		}
@@ -148,7 +159,7 @@ func (prr *pathReduceRewriteReader) Read(p []byte) (n int, err error) {
 
 	if !prr.NotSetProtocolOnQuery {
 		protocol := FormatProtocol(&u)
-		if protocol != "" {
+		if protocol != "" && protocol != "http" {
 			query := u.QueryString()
 			if len(query) == 0 {
 				query = append(query[:0], []byte(protocolTag+protocol)...)
@@ -167,12 +178,7 @@ func (prr *pathReduceRewriteReader) Read(p []byte) (n int, err error) {
 
 	pathHost := ToSWReduceLetDigHyp(string(u.Host()), string(u.Scheme()))
 	path := u.PathOriginal()
-	// if bytes.IndexByte(path, '.') > -1 {
-	// 	fmt.Println(string(path))
-	// 	fmt.Println(string(u.Path()))
 
-	// 	path = u.Path()
-	// }
 	if len(path) > 0 && path[0] != '/' {
 		path = append([]byte{'/'}, path...)
 
@@ -191,6 +197,8 @@ type domainRewriteReader struct {
 	originProtocol        []byte
 	NotSetProtocolOnQuery bool
 	baseURI               []byte
+	ProcessRelativePath   bool
+	buf                   *bytes.Buffer
 }
 
 func newDomainRewriteReader(originHost, originProtocol, baseURI, src []byte) *domainRewriteReader {
@@ -202,16 +210,86 @@ func newDomainRewriteReader(originHost, originProtocol, baseURI, src []byte) *do
 	}
 }
 
+func newDomainRewriteReaderProcessRelative(originHost, originProtocol, baseURI, src []byte) *domainRewriteReader {
+	return &domainRewriteReader{
+		src:                 src,
+		originHost:          originHost,
+		originProtocol:      originProtocol,
+		baseURI:             baseURI,
+		ProcessRelativePath: true,
+	}
+}
+
+func (drw *domainRewriteReader) read(p []byte) (n int, err error) {
+	if drw.buf != nil {
+		return drw.buf.Read(p)
+	}
+	return 0, io.EOF
+}
 func (drw *domainRewriteReader) Read(p []byte) (n int, err error) {
 	if len(drw.src) == 0 {
 		return 0, io.EOF
 	}
+
+	if drw.buf != nil {
+		return drw.read(p)
+	}
+
+	for _, n := range UnRewriteTable {
+		if len(drw.src) < len(n) {
+			continue
+		}
+		if bytes.Index(bytes.ToLower(drw.src[:len(n)]), n) == 0 {
+			// return copy(p, drw.src), io.EOF
+			if drw.buf == nil {
+				drw.buf = bytes.NewBuffer(drw.src)
+			}
+
+			return drw.read(p)
+		}
+	}
 	var protocolTag = "__dp="
 	var u fasthttp.URI
+	var baseURI = fasthttp.AcquireURI()
+	defer fasthttp.ReleaseURI(baseURI)
+	baseURI.Parse(nil, drw.baseURI)
+	baseURI.DisablePathNormalizing = true
+
 	u.Parse(nil, drw.src)
+
 	u.DisablePathNormalizing = true
+
+	if len(drw.src) > 1 && drw.src[0] == '/' && drw.src[1] == '/' {
+		// drw.baseURI
+		u.SetSchemeBytes(baseURI.Scheme())
+	}
+	// fmt.Println(string(u.RequestURI()))
+	// fmt.Println(string(u.FullURI()), string(drw.src))
+	if len(u.Host()) == 0 && !drw.ProcessRelativePath {
+		if drw.buf == nil {
+			drw.buf = bytes.NewBuffer(drw.src)
+		}
+
+		return drw.read(p)
+	}
+
 	if len(u.Host()) == 0 {
-		return copy(p, drw.src), io.EOF
+
+		if len(u.PathOriginal()) > 0 {
+			switch u.PathOriginal()[0] {
+			case '/':
+			default:
+				if drw.buf == nil {
+					drw.buf = bytes.NewBuffer(drw.src)
+				}
+				return drw.read(p)
+			}
+		} else {
+			u.SetPathBytes(baseURI.PathOriginal())
+		}
+		u.SetHostBytes(baseURI.Host())
+		u.SetSchemeBytes(baseURI.Scheme())
+
 	}
 
 	if !drw.NotSetProtocolOnQuery {
@@ -238,7 +316,8 @@ func (drw *domainRewriteReader) Read(p []byte) (n int, err error) {
 	u.SetHostBytes(append(formatHost, drw.originHost...))
 	u.SetSchemeBytes(drw.originProtocol)
 	uri := u.FullURI()
-	return copy(p, uri), io.EOF
+	drw.buf = bytes.NewBuffer(uri)
+	return drw.read(p)
 }
 
 func formatHostBytes(host, portprefix, sep []byte) []byte {

@@ -3,7 +3,9 @@ package html
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
+	"net/http"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -21,6 +23,26 @@ type HTMLExacter struct {
 	commands  Commands
 }
 
+func NewHTMLExactorWithScript(req *http.Request, script string, body []byte) (interface{}, error) {
+	r := bytes.NewReader(body)
+	return newHTMLExactorWithScript(req, script, r)
+
+}
+func newHTMLExactorWithScript(req *http.Request, script string, r io.Reader) (interface{}, error) {
+	var commands []Command
+	err := json.Unmarshal([]byte(script), &commands)
+	if err != nil {
+		return nil, err
+	}
+	exacter, err := NewHTMLExacter(r, nil)
+	if err != nil {
+		return nil, err
+	}
+	exacter.AddCommands(commands...)
+	exacter.AddRequestContext(req)
+	return exacter.Exec()
+
+}
 func NewHTMLExacter(r io.Reader, tagsTable TagsTable) (*HTMLExacter, error) {
 	h := &HTMLExacter{
 		tagstable: tagsTable,
@@ -33,12 +55,21 @@ func NewHTMLExacter(r io.Reader, tagsTable TagsTable) (*HTMLExacter, error) {
 	// h.NewReader(r)
 	return h, nil
 }
-
+func (h *HTMLExacter) AddRequestContext(req *http.Request) *HTMLExacter {
+	h.ctx = context.WithValue(h.ctx, RequestKey, req)
+	return h
+}
+func (h *HTMLExacter) AddResponseContext(resp *http.Response) *HTMLExacter {
+	h.ctx = context.WithValue(h.ctx, ResponseKey, resp)
+	return h
+}
 func (h *HTMLExacter) parseXPath(r io.Reader) error {
 	root, err := xmlpath.ParseHTML(r)
 	if err != nil {
 		return err
 	}
+
+	h.ctx = context.WithValue(h.ctx, BodyKey, root.Bytes())
 	h.ctx = context.WithValue(h.ctx, RootNodeKey, root)
 	// fmt.Println(ctx)
 

@@ -1,0 +1,108 @@
+{
+    "detail": [
+        {
+            "periodical": {
+                "Id": "TLP12_4-5\\TLP\\TLP12_4-5\\S1471068412000142h.xml",
+                "Title": [
+                    "ASP modulo CSP: The clingcon system",
+                    ""
+                ],
+                "Creator": [
+                    "MAX OSTROWSKI"
+                ],
+                "FirstCreator": "MAX OSTROWSKI",
+                "ScholarId": [],
+                "ForeignCreator": [],
+                "CreatorForSearch": [
+                    "MAX OSTROWSKI"
+                ],
+                "OrganizationNorm": [],
+                "OrganizationNew": [],
+                "OriginalOrganization": [
+                    "Institut für Informatik, Universit?t Potsdam"
+                ],
+                "OrganizationForSearch": [
+                    "Institut für Informatik, Universit?t Potsdam"
+                ],
+                "OriginalClassCode": [],
+                "MachinedClassCode": [],
+                "ClassCodeForSearch": [],
+                "ContentSearch": [
+                    "ASP modulo CSP: The clingcon system",
+                    ""
+                ],
+                "Keywords": [],
+                "ForeignKeywords": [],
+                "MachinedKeywords": [],
+                "KeywordForSearch": [],
+                "Abstract": [],
+                "CitedCount": 0,
+                "PeriodicalId": "Cambridge_TLP",
+                "PeriodicalTitleForSearch": [],
+                "PeriodicalTitle": [],
+                "SourceDB": [
+                    "Cambridge"
+                ],
+                "IsOA": false,
+                "Fund": [],
+                "PublishDate": "2020-12-09 00:00:00",
+                "MetadataOnlineDate": "2017-01-01 00:00:00",
+                "FulltextOnlineDate": "3000-01-01 00:00:00",
+                "ServiceMode": 0,
+                "HasFulltext": false,
+                "PublishYear": 2012,
+                "Issue": "4-5",
+                "Volum": "12",
+                "Page": "485-503",
+                "PageNo": "19",
+                "Column": [],
+                "CorePeriodical": [],
+                "FulltextPath": "",
+                "DOI": "10.1017/S1471068412000142",
+                "AuthorOrg": [
+                    "MAX OSTROWSKI:Institut für Informatik, Universit?t Potsdam"
+                ],
+                "ThirdPartyUrl": [
+                    "Cambridge:https://doi.org/10.1017/S1471068412000142,"
+                ],
+                "Language": "eng",
+                "ISSN": "1471-0684",
+                "CN": "",
+                "SequenceInIssue": 0,
+                "MetadataViewCount": 0,
+                "ThirdpartyLinkClickCount": 0,
+                "DownloadCount": 0,
+                "PrePublishVersion": "",
+                "PrePublishGroupId": "",
+                "PublishStatus": "Regular",
+                "Type": "Periodical",
+                "history": [],
+                "HighLight": {},
+                "ResourceType": "",
+                "Original": [
+                    {
+                        "URL": "http://www.wanfangdata.com.cn/search/jumpOriginal.do?url=https%3A%2F%2Fdoi.org%2F10.1017%2FS1471068412000142&platform=Cambridge&source_id=TLP12_4-5\\TLP\\TLP12_4-5\\S1471068412000142h.xml&resourceType=Periodical&param=Id",
+                        "ShowName": "剑桥大学出版社",
+                        "Status": "NetWork",
+                        "Platform": "Cambridge",
+                        "id": ""
+                    },
+                    {
+                        "URL": "http://www.wanfangdata.com.cn/search/jumpOriginal.do?url=https%3A%2F%2Fdoi.org%2F10.1017%2FS1471068412000142&source_id=TLP12_4-5\\TLP\\TLP12_4-5\\S1471068412000142h.xml&resourceType=Periodical&param=Id",
+                        "ShowName": "DOI",
+                        "Status": "NetWork",
+                        "Platform": "DOI",
+                        "id": "10.1017/S1471068412000142"
+                    }
+                ],
+                "ButtonStatus": {
+                    "NetWork": "true"
+                }
+            }
+        }
+    ],
+    "extraData": {
+        "Status": "SUCCESS"
+    },
+    "total": 0
+}

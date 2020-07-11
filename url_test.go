@@ -1,7 +1,10 @@
 package rewrite
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/valyala/fasthttp"
 )
 
 func TestUrlRewriter(t *testing.T) {
@@ -134,18 +137,41 @@ func TestWOSNewUrlsinRewriter(t *testing.T) {
 		{"/a/b?", "/a/b?"},
 		{"a/b?", "a/b?"},
 		{"../a/b?", "../a/b?"},
-		{"http://images.drcnet-sod.com/javascript/jquery.min.js", "../a/b?"},
+		{"https://images.drcnet-sod.com/javascript/jquery.min.js", "https://images.drcnet-sod.com.wf/javascript/jquery.min.js?__dp=https"},
+		{"https://onlinelibrary.wiley.com/action/ajaxShowPubInfo?accordionHeadingWrapper=h2&ajax=true&displayAlmetricDropzone=true&displayCitedByLink=true&doi=10.1002%2Fjps.23423&pbContext=%3BrequestedJournal%3Ajournal%3A15206017%3Barticle%3Aarticle%3Adoi%5C%3A10.1002%2Fjps.23423%3Bpage%3Astring%3AArticle%2FChapter+View%3Bctype%3Astring%3AJournal+Content%3BsubPage%3Astring%3AAbstract%3Bwebsite%3Awebsite%3Apericles%3Bjournal%3Ajournal%3A19302169%3Bissue%3Aissue%3Adoi%5C%3A10.1002%2Fjps.v102.3%3Bwgrou", "a"},
 	})
-	rw := NewURLRewriter("https://www.webofknowledge.com.wf/abc/d", "wf", "https", true, 0)
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/d", "wf:80", "http", true, 0)
+	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
+	// rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases)
+}
+
+func TestWOSNewUrlsinRewriterProcessRelative(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://.www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
+		{"https://www.webofknowledge.com?", "https://www.webofknowledge.com.wf?__dp=https"},
+		{"http://www.webofknowledge.com:84?", "https://www.webofknowledge.com.wf?__dp=http|84"},
+		{"//www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
+		{"/a/b?", "https://www.webofknowledge.com.wf/a/b?__dp=https"},
+		{"a/b?", "https://www.webofknowledge.com.wf/abc/a/b?__dp=https"},
+		{"../a/b?", "https://www.webofknowledge.com.wf/a/b?__dp=https"},
+		{"https://images.drcnet-sod.com/javascript/jquery.min.js", "https://images.drcnet-sod.com.wf/javascript/jquery.min.js?__dp=https"},
+		{"https://ieeexplore.ieee.org/Xplore/home.jsp", "https://ieeexplore.ieee.org.wf/Xplore/home.jsp"},
+	})
+	rw := NewURLRewriterRelativePath("https://www.webofknowledge.com/abc/d", "wf", "https", false, 0)
 	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
 	// rw.ProtocolOnQuery(true)
 	testRewriteCases(t, rw, cases)
 }
 
 func TestWOSNewUrlsinSWRRewriter(t *testing.T) {
+
 	cases := stringTestCases([]stringTestCase{
-		{"http://www.webofknowledge.com?", "https://wf/--/com/webofknowledge/www/_"},
-		{"http://www.webofknowledge.com/a?", "https://wf/--/com/webofknowledge/www/_/a"},
+		{"http://www.webofknowledge.com", "https://wf/--/com/webofknowledge/www/_"},
+		{"http://www.webofknowledge.com?", "https://wf/--/com/webofknowledge/www/_?"},
+		{"http://www.webofknowledge.com/", "https://wf/--/com/webofknowledge/www/_/"},
+		{"http://www.webofknowledge.com/?", "https://wf/--/com/webofknowledge/www/_/?"},
+		{"http://www.webofknowledge.com/a", "https://wf/--/com/webofknowledge/www/_/a"},
 		{"https://www.webofknowledge.com?a=b", "https://wf/--/com/webofknowledge/www/_?a=b&__dp=https"},
 		{"/a/b?", "https://wf/--/com/webofknowledge/www/_/a/b?__dp=https"},
 		{"a/b?", "https://wf/--/com/webofknowledge/www/_/abc/a/b?__dp=https"},
@@ -155,12 +181,38 @@ func TestWOSNewUrlsinSWRRewriter(t *testing.T) {
 		{"images/gb/icon-d.gif", "https://wf/--/com/webofknowledge/www/_/abc/images/gb/icon-d.gif?__dp=https"},
 		{"?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&", "https://wf/--/com/webofknowledge/www/_/abc/a?curpage=2&RecordsPerPage=20&QueryID=9&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_default_result_aspx&isinEn=1&&__dp=https"},
 		{"javascript:__doPostBack('Button1','')", "javascript:__doPostBack('Button1','')"},
-		{"javascript:__doPostBack('Button1','')", "javascript:__doPostBack('Button1','');"},
-		{"&#xA;                    http://doi.cnki.net/doi/Resolution/Handler?doi= 10.1016/j.bbapap.2020.140410", "https://wf/--/net/cnki/doi/_/doi/Resolution/Handler?doi= 10.1016/j.bbapap.2020.140410&__dp=http"},
+		{"javascript:__doPostBack('Button1','');", "javascript:__doPostBack('Button1','');"},
+		{"&#xA;                    http://doi.cnki.net/doi/Resolution/Handler?doi= 10.1016/j.bbapap.2020.140410", "https://wf/--/net/cnki/doi/_/doi/Resolution/Handler?doi= 10.1016/j.bbapap.2020.140410"},
 		{"javascript:void();", "javascript:void();"},
+		{"#", "#"},
 	})
 	rw := NewURLRewriter("https://www.webofknowledge.com/abc/a?s", "wf", "https", true, 1)
 	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
 	// rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases[:4])
+}
+
+func TestWanfangLocation(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://common.wanfangdata.com.cn/pay/submitWeb.do?webDownResourceRequest=eyJyZXF1ZXN0X3VybCI6Imh0dHA6Ly9jb21tb24ud2FuZmFuZ2RhdGEuY29tLmNuL3BheS9zdWJtaXRXZWIuZG8iLCJ3ZWJEb3duUmVzb3VyY2VQYXJhbSI6eyJ1bml0IjoiNSIsImxhbmd1YWdlIjoiY2hpIiwicmVzb3VyY2VfdHlwZSI6InBlcmlvIiwic291cmNlIjoiV0YiLCJkb3duX3Jlc291cmNlX2lkIjoicnloeGd5MjAxOTEyMDA0IiwiZG93bl9yZXNvdXJjZV90aXRsZSI6IkFTUOS4ieWFg-WkjeWQiOmpseayueS9k-ezu-WcqOmVv-WyqeW_g-S4reeahOi_kOenu-inhOW-iyIsInN0YXR1cyI6MSwiaXNvYSI6ZmFsc2UsImZpcnN0cHVibGlzaCI6bnVsbCwiaXNyZXN1bHQiOmZhbHNlLCJiYWNrdXJsIjoiIiwicGllY2UiOjAsImNvcHkiOjAsIml0ZW0iOjAsIm5leHQiOjAsImt3b3JkIjowLCJtd29yZCI6MCwiaW5kaXZpZHVhbCI6MCwicGFnZSI6MCwicmVzb3VyY2VMaW1pdHNEVE8iOm51bGwsInJlc291cmNlTGltaXRzU1REIjpudWxsfX0", ""},
+		{"//oup.silverchair-cdn.com/UI/app/vendor/jquery-2.2.4.js", "http://oup.silverchair-cdn.com/UI/app/vendor/jquery-2.2.4.js?__dp=https"},
+	})
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/a?s", "wf", "http", true, 0)
 	testRewriteCases(t, rw, cases)
+}
+
+func TestNGTemplate(t *testing.T) {
+	// http://www.specialsci.cn/searchresult?complex=%2Basp&from=Fast
+
+	cases := stringTestCases([]stringTestCase{
+		{"/../detail/{{s.gui}}?view=detailed", ""},
+	})
+	rw := NewURLRewriterRelativePath("http://www.specialsci.cn/searchresult/a?complex=%2Basp&from=Fast", "wf", "http", true, 0)
+
+	testRewriteCases(t, rw, cases)
+	u := fasthttp.AcquireURI()
+	u.Parse(nil, []byte("http://www.specialsci.cn/detail/202001100740289732848460?view=detailed"))
+	u.Update("app/app.1b070094.js")
+	fmt.Println(u.String())
+
 }

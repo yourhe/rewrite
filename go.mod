@@ -3,8 +3,10 @@ module gitlab.iyorhe.com/dr2am/dr2am-rewrite
 go 1.14
 
 require (
+	github.com/antlr/antlr4 v0.0.0-20200417160354-8c50731894e0
 	github.com/coreos/etcd v3.3.18+incompatible // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/jaytaylor/html2text v0.0.0-20200220170450-61d9dc4d7195 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -13,7 +15,8 @@ require (
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/valyala/fasthttp v1.9.0
-	gitlab.iyorhe.com/dr2am/jsast v0.0.0-20200316155750-2c62cca9c61d
+	gitlab.iyorhe.com/dr2am/jsast v0.0.0-20200704174327-5cafa88a3bc6
+	gitlab.iyorhe.com/dr2am/otto v0.0.0-20200317011938-47d51d8cb455 // indirect
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297
 	golang.org/x/text v0.3.0
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

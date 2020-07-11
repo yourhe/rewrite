@@ -1,6 +1,7 @@
 package rewrite
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 )
@@ -86,12 +87,12 @@ var input = map[string]string{
 	"Tk":                                  "prefix",
 	"Upgrade":                             "prefix",
 	"Upgrade-Insecure-Requests":           "prefix",
-	"Vary":             "prefix",
-	"Via":              "prefix",
-	"Warning":          "prefix",
-	"Www-Authenticate": "keep",
-	"X-Frame-Options":  "prefix",
-	"X-Xss-Protection": "prefix",
+	"Vary":                                "prefix",
+	"Via":                                 "prefix",
+	"Warning":                             "prefix",
+	"Www-Authenticate":                    "keep",
+	"X-Frame-Options":                     "prefix",
+	"X-Xss-Protection":                    "prefix",
 }
 
 var output = map[string]string{
@@ -144,4 +145,10 @@ var output = map[string]string{
 	"Www-Authenticate":                         "keep",
 	"Test-X-Frame-Options":                     "prefix",
 	"Test-X-Xss-Protection":                    "prefix",
+}
+
+func TestEEEeeee(t *testing.T) {
+	g := []byte{'1', '/'}
+	fmt.Println(string(g[len(g)-1]))
+	fmt.Println(string(g[:len(g)-1]))
 }
