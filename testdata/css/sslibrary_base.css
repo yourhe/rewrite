@@ -1,0 +1,2842 @@
+@charset "utf-8";
+
+/* CSS Document */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    font-family: "Microsoft YaHei", "Apple LiGothic Medium", "NSimSun", "FontAwesome", "Arial" !important;
+    display: block;
+    line-height: 1;
+}
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+caption,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    vertical-align: baseline;
+    outline: none;
+    z-index: 1;
+}
+
+* {
+    font-family: "Microsoft YaHei", "Apple LiGothic Medium", "NSimSun", "FontAwesome", "Arial" !important;
+}
+
+.loading {
+    position: fixed;
+    background: #000000;
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+    z-index: 1000;
+}
+
+.loadinggif {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: none;
+    width: 200px;
+    height: 200px;
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+    color: #555;
+}
+
+a:hover {
+    color: #17807B;
+}
+
+.clear {
+    clear: both;
+    line-height: 0px;
+    font-size: 0px;
+    height: 0px;
+}
+
+.hide {
+    display: none
+}
+
+.focusbar {
+    height: 400px;
+    background-color: #5f4214;
+}
+
+.focusbar .focuscolorbg {
+    width: 100%;
+    height: 400px;
+    position: absolute;
+    left: 0;
+    z-index: 0;
+    min-width: 1000px;
+}
+
+.focusbar .focuscolorbg div {
+    height: 400px;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    z-index: 0;
+}
+
+.focusbar .focuscolorbg div:first-child {
+    z-index: 1;
+}
+
+.focusbar .focusbody {
+    width: 1000px;
+    position: absolute;
+    left: 50%;
+    margin-left: -500px;
+    z-index: 1;
+}
+
+.focusbar .leftfocusbody {
+    float: left;
+    width: 770px;
+    height: 400px;
+    overflow: hidden;
+}
+
+.focusbar .focuspicture {
+    height: 400px;
+    width: 770px;
+    display: block;
+    overflow: hidden;
+}
+
+.focusbar .focuspicture img {
+    position: absolute;
+    height: 400px;
+    width: 770px;
+    display: block;
+    z-index: 0;
+}
+
+.focusbar .focuspicture img:first-child {
+    z-index: 1;
+}
+
+.focusbar .smailpicture {
+    position: absolute;
+    width: 770px;
+    height: 60px;
+    margin-top: -60px;
+    z-index: 2;
+}
+
+.focusbar .smailpicture img {
+    display: block;
+    width: 96px;
+    height: 50px;
+    border: none;
+    float: left;
+    margin-left: 10px;
+}
+
+.focusbar .smailpicture img:hover {
+    box-shadow: 0 0 4px #fff;
+}
+
+.focusbar .smailpicture img.hover {
+    border: #FFE500 solid 1px;
+    width: 94px;
+    height: 48px;
+}
+
+.focusbar .rightfocusbody {
+    position: relative;
+    float: right;
+    width: 230px;
+    height: 400px;
+    background: url(../images/webui/image/opacity0.5.png);
+}
+
+.english_nav .icon {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    left: 50px;
+    top: 6px;
+}
+
+.english_nav {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    width: 230px;
+    height: 35px;
+    line-height: 35px;
+}
+
+.english_nav a {
+    position: absolute;
+    z-index: 4;
+    display: block;
+    padding-left: 0px;
+    width: 215px;
+    height: 35px;
+    line-height: 34px;
+    padding-left: 15px;
+    color: #00FFF9;
+    text-align: center;
+}
+
+.english_nav:hover {
+    color: #00FFF9;
+    background-color: #2e879a;
+}
+
+.english_nav .bg {
+    position: absolute;
+    z-index: 0;
+    background: #219dab;
+    width: 230px;
+    height: 35px;
+}
+
+.tabbar {
+    width: 100%;
+    height: 45px;
+}
+
+.tabbar .tab.hover i {
+    color: #FF8600;
+}
+
+.tabbar .tab {
+    cursor: pointer;
+    background: url(../images/webui/image/opacity0.5.png);
+    width: 50%;
+    text-align: center;
+    line-height: 45px;
+    font-size: 16px;
+    float: left;
+    color: #9F9F9F;
+}
+
+.tabbar .tab.hover {
+    background-color: transparent;
+    background: none;
+    color: #FFF;
+}
+
+.tabval .linklist {
+    line-height: 31px;
+    padding: 8px 10px 0 10px;
+}
+
+.tabval .linklist a {
+    display: block;
+    height: 31px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tabval .linklist .hot {
+    color: #fff045;
+}
+
+.tabval .linklist .new {
+    color: #7ee9ff;
+}
+
+.tabval .linklist a {
+    color: #fff;
+    display: block;
+    height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: url(../images/webui/icon/dian.png) no-repeat left center;
+    padding-left: 14px;
+}
+
+.tabval .linklist a:hover {
+    text-decoration: underline;
+}
+
+.reconmendbar {
+    background: #fff;
+}
+
+.reconmendval {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.classroom_bar {
+    width: 300px;
+    float: left;
+}
+
+.classroom_bar .capbar {
+    height: 40px;
+    margin-top: 10px;
+    line-height: 40px;
+}
+
+.classroom_bar .capbar .menucap {
+    float: left;
+    white-space: nowrap;
+    font-size: 18px;
+}
+
+.classroom_bar .capbar .more {
+    white-space: nowrap;
+    text-align: right;
+    float: right;
+    color: #D1D1D1;
+    width: 30px;
+}
+
+.classroom_bar .capbar .more:hover {
+    color: #1E9492;
+}
+
+.classroom_bar .picture,
+.classroom_bar .picture img {
+    height: 170px;
+    width: 300px;
+    display: block;
+    overflow: hidden;
+    border: none;
+}
+
+.classroom_bar .picture .cap {
+    position: absolute;
+    width: 300px;
+    height: 35px;
+    margin-top: -35px;
+    color: #fff;
+    line-height: 35px;
+    background: url(../images/webui/image/opacity0.5.png);
+}
+
+.classroom_bar .picture .cap span {
+    padding-left: 10px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.classroom_bar .value {
+    margin-top: 10px;
+    line-height: 25px;
+    height: 75px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reconmend_video_bar {
+    float: right;
+    width: 690px;
+    overflow: hidden;
+    padding-left: 10px;
+}
+
+.reconmend_video_bar .capbar {
+    height: 40px;
+    margin-top: 10px;
+    line-height: 40px;
+    padding-left: 10px;
+}
+
+.reconmend_video_bar .capbar .menucap {
+    float: left;
+    white-space: nowrap;
+    font-size: 18px;
+}
+
+.reconmend_video_bar .capbar .more {
+    white-space: nowrap;
+    text-align: right;
+    float: right;
+    color: #D1D1D1;
+    width: 30px;
+}
+
+.reconmend_video_bar .capbar .more:hover {
+    color: #1E9492;
+}
+
+.reconmend_video_bar .videolist {}
+
+.reconmend_video_bar .videolist .node {
+    position: relative;
+    float: left;
+    margin-left: 10px;
+    width: 220px;
+    height: 120px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.reconmend_video_bar .videolist .img {
+    width: 220px;
+    height: 120px;
+    overflow: hidden;
+}
+
+.reconmend_video_bar .videolist .cap {
+    position: absolute;
+    padding: 0 10px;
+    width: 200px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    bottom: 0;
+    background: url(../images/webui/image/opacity0.5.png);
+    color: #fff;
+}
+
+.guesslikebar {
+    background: #fff;
+}
+
+.guess_like_body {
+    background: #fff;
+    width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.guess_like_body .capbar {
+    height: 40px;
+    margin-top: 10px;
+    line-height: 40px;
+}
+
+.guess_like_body .capbar .menucap {
+    float: left;
+    white-space: nowrap;
+    font-size: 18px;
+    max-width: 500px;
+    color: #FF8600;
+}
+
+.guess_like_body .capbar .loadmore {
+    float: right;
+    white-space: nowrap;
+    max-width: 500px;
+}
+
+.guess_like_body .capbar .loadmore a {
+    padding: 0 10px;
+    color: #288994;
+}
+
+.guess_like_list {
+    width: 1010px;
+}
+
+.guess_like_list .node {
+    float: left;
+    margin-right: 10px;
+    width: 192px;
+    height: 140px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.guess_like_list .img {
+    width: 192px;
+    height: 105px;
+    overflow: hidden;
+}
+
+.guess_like_list .cap {
+    width: 192px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.kyxlybar,
+.zxkckbar,
+.stlbcbar,
+.zjdyzbar,
+.ksjjcbar,
+.yxdzsbar,
+.cooperationbar {
+    background: #fff;
+    padding: 25px 0 15px 0;
+    width: 100%;
+    min-width: 1000px;
+}
+
+.yxdzsbar {
+    background: #efeff1;
+    padding: 25px 0 25px 0;
+}
+
+.kyxlybody,
+.zxkckbody,
+.stlbcbody,
+.zjdyzbody,
+.ksjjcbody,
+.yxdzsbody,
+.cooperationbody {
+    width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.stlbcbar,
+.ksjjcbar {
+    background: #efeff1;
+}
+
+.kyxlybg {
+    background: #f9922d;
+}
+
+.zxkckbg {
+    background: #d43a5c;
+}
+
+.stlbcbg {
+    background: #3f36c7;
+}
+
+.zjdyzbg {
+    background: #d0a233;
+}
+
+.ksjjcbg {
+    background: #e03c3d;
+}
+
+.yxdzsbg {
+    background: #3c951d;
+}
+
+.menunodeshape,
+.bignodeshape,
+.fournodeshape {
+    float: left;
+    height: 261px;
+    overflow: hidden;
+}
+
+.menunodeshape {
+    width: 335px;
+}
+
+.menunodeshape .menulist {
+    padding: 10px 0px 10px 20px;
+}
+
+.menunodeshape .menulist .cap {
+    font-size: 22px;
+    font-weight: bold;
+    height: 40px;
+    line-height: 40px;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.menunodeshape .menulink {
+    height: 56px;
+    line-height: 25px;
+}
+
+.menunodeshape .menulink a {
+    color: #fff;
+    display: block;
+    float: left;
+    width: 90px;
+    margin-right: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.menunodeshapes {
+    width: 170px;
+    height: 245px;
+    float: left;
+    overflow: hidden;
+}
+
+.menunodeshapes .menulists {
+    padding: 10px 0px 10px 20px;
+}
+
+.menunodeshapes .menulists .cap {
+    font-size: 22px;
+    font-weight: bold;
+    height: 40px;
+    line-height: 40px;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.menunodeshapes .menulinks {
+    line-height: 27px;
+}
+
+.menunodeshapes .menulinks a {
+    color: #fff;
+    display: block;
+    float: none;
+    margin-right: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.fournodeshape {
+    width: 335px;
+    float: left;
+    margin-left: 15px;
+}
+
+.nodetwopart {
+    padding-top: 13px;
+}
+
+.nodetwopart .nodebody {
+    margin-left: -15px;
+}
+
+.nodetwopart .node {
+    display: block;
+    float: left;
+    width: 160px;
+    height: 122px;
+    margin-left: 15px;
+}
+
+.nodetwopart .node .img {
+    width: 160px;
+    height: 87px;
+    display: block;
+}
+
+.nodetwopart .node .cap {
+    height: 35px;
+    line-height: 35px;
+    width: 160px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.bignodeshape {
+    margin-left: 15px;
+    float: left;
+}
+
+.bignodeshape .node .img {
+    width: 300px;
+    height: 226px;
+    display: block;
+}
+
+.bignodeshape .node .cap {
+    height: 35px;
+    line-height: 35px;
+    width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nodefourpart {
+    margin-left: -15px;
+}
+
+.nodefourpart .node {
+    display: block;
+    float: left;
+    width: 160px;
+    height: 139px;
+    margin-left: 15px;
+}
+
+.nodefourpart .node .img {
+    width: 160px;
+    height: 87px;
+    display: block;
+}
+
+.nodefourpart .node .cap {
+    height: 35px;
+    line-height: 35px;
+    width: 160px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.nodeshapelist {
+    height: 245px;
+    float: left;
+    width: 830px;
+}
+
+.nodeshapelist .node {
+    float: left;
+    margin-left: 15px;
+    display: block;
+}
+
+.nodeshapelist .node .img {
+    width: 150px;
+    height: 210px;
+}
+
+.nodeshapelist .node .cap,
+.nodeshapelist .node .cap_s {
+    width: 150px;
+    height: 35px;
+    line-height: 35px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nodeshapelist .node .cap_s {
+    font-size: 12px;
+    height: 20px;
+    line-height: 20px;
+    color: #C9C9C9;
+}
+
+.cooperationbar .capbar {
+    text-align: center;
+    height: 50px;
+    font-size: 18px;
+    color: #4B4B4B;
+}
+
+.cooperationbody {
+    position: relative;
+    width: 1000px;
+    height: 120px;
+}
+
+.cooperationbody .leftbt {
+    position: absolute;
+    z-index: 9;
+    left: 0;
+    width: 30px;
+    height: 120px;
+    cursor: pointer;
+    background: url(../images/webui/image/leftbt.png) no-repeat;
+}
+
+.cooperationbody .imglistcontent {
+    position: absolute;
+    width: 940px;
+    overflow: hidden;
+    left: 30px;
+    height: 120px;
+}
+
+.cooperationbody .imglist {
+    overflow: hidden;
+    width: 5000px;
+    height: 120px;
+}
+
+.cooperationbody .node {
+    display: block;
+    float: left;
+    height: 120px;
+    max-width: 150px;
+    margin-right: 15px;
+    color: #000000;
+}
+
+.cooperationbody .img {
+    height: 85px;
+    height: 85px;
+    max-width: 150px;
+    display: block;
+    margin: 0 auto;
+}
+
+.cooperationbody .cap {
+    height: 35px;
+    line-height: 35px;
+    max-width: 150px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000000;
+}
+
+.cooperationbody .rightbt {
+    z-index: 10;
+    right: 0px;
+    position: absolute;
+    cursor: pointer;
+    width: 60px;
+    height: 120px;
+    background: url(../images/webui/image/rightbt.png) no-repeat;
+}
+
+/*列表页 开始*/
+.clearfix {
+    zoom: 1;
+    clear: both;
+}
+
+.clearfix:after {
+    clear: both;
+    content: " ";
+    display: block;
+    height: 0;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.listnavbar {
+    background: #fff;
+    width: 100%;
+    min-width: 1000px;
+}
+
+.listnavbar .listnavbody {
+    width: 1000px;
+    margin: 0 auto;
+    height: 50px;
+    line-height: 50px;
+    color: #D7D7D7;
+}
+
+.listnavbar .listnavbody a {
+    color: #939393;
+    padding: 0 5px;
+}
+
+.listnavbar .listnavbody a:last-child {
+    color: #56afc1
+}
+
+.listvalbar {
+    background: #f5f5f5;
+    min-width: 1000px;
+    padding: 15px;
+}
+
+.listvalbar .listvalbody {
+    width: 1000px;
+    margin: 0 auto;
+    line-height: 50px;
+    background: url(../images/webui/image/vallistbg.png) repeat-y #fff;
+    box-shadow: 0px 2px 3px #ddd;
+    min-height: 700px;
+}
+
+.listvalbody .list {
+    float: left;
+    width: 249px;
+    padding-bottom: 30px;
+}
+
+.listvalbody .data {
+    float: right;
+    width: 750px;
+}
+
+.listvalbody .data .menubar {
+    border-bottom: #f5f5f5 solid 1px;
+    height: 50px;
+    line-height: 50px;
+}
+
+.listvalbody .data .cap {
+    padding-left: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 300px;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.listvalbody .data .sort {
+    padding-right: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 300px;
+    float: right;
+}
+
+.listvalbody .sort a {
+    display: block;
+    float: right;
+    padding: 0 10px;
+}
+
+.listvalbody .sort a.hover {
+    color: #56afc1;
+    line-height: 47px;
+    border-bottom: 3px solid #56afc1;
+}
+
+.listvalbody .list a {
+    display: block;
+    padding: 0 30px 0 25px;
+    height: 50px;
+    border-bottom: #f2f2f2 solid 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: url(../images/webui/image/listlinkbg.png) no-repeat right;
+    font-size: 16px;
+}
+
+.listvalbody .list a:hover {
+    background-color: #f5f5f5;
+}
+
+.listvalbody .list a.hover,
+.listvalbody .list .hover:hover {
+    border-left: #2F808A 3px solid;
+    padding: 0 30px 0 22px;
+    background-color: #fff;
+}
+
+.listvalbody .listval {
+    min-height: 300px;
+    padding: 10px 0 15px 0;
+}
+
+.listvalbody .listval .node {
+    float: left;
+    margin-left: 23px;
+    width: 220px;
+    height: 155px;
+    overflow: hidden;
+    margin-top: 25px;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 3px #C3C3C3;
+}
+
+.listvalbody .listval .node:hover {
+    box-shadow: 0 0px 7px #0c5f6f
+}
+
+.listvalbody .listval .img {
+    width: 220px;
+    height: 120px;
+    display: block;
+    overflow: hidden;
+}
+
+.listvalbody .listval .cap {
+    width: 220px;
+    height: 35px;
+    padding: 0;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #9E9E9E;
+    text-indent: 10px;
+}
+
+.listvalbar .listvalbody.ebook .node {
+    width: 150px;
+    height: 250px;
+    margin-top: 25px;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.listvalbody.ebook .listval .img {
+    width: 150px;
+    height: 210px;
+}
+
+.listvalbody.ebook .listval .cap {
+    width: 140px;
+    padding: 0 10px;
+}
+
+/*列表页 结束*/
+/*详情页 开始*/
+.detailnavbar {
+    background: #434343;
+    width: 100%;
+    min-width: 1000px;
+}
+
+.detailnavbar .detailnavbody {
+    width: 1000px;
+    margin: 0 auto;
+    height: 50px;
+    line-height: 50px;
+    color: #939393;
+}
+
+.detailnavbar .detailnavbody a {
+    color: #D7D7D7;
+    padding: 0 5px;
+}
+
+.detailnavbar .detailnavbody a:last-child {
+    color: #56afc1
+}
+
+.detailbar {
+    background: #333333;
+    padding: 20px 0;
+}
+
+.detailbar .detailbody {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.detailbar .detailtitle {
+    height: 35px;
+    line-height: 35px;
+    padding-left: 15px;
+    color: #fff;
+    background-color: #000000;
+}
+
+.detailbar .detailcontent {
+    width: 1000px;
+    background: #000;
+    /*height:500px;*/
+}
+
+.detailbar .detailcontent object {
+    position: absolute;
+    z-index: 1;
+    width: 1000px;
+    height: 500px;
+}
+
+.detailmsgbar {
+    padding: 15px 0;
+    background-color: #f9f9f9;
+}
+
+.detailmsgbar .detailmsgbody {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.detailmsgbar .detailmsgbody .detaicontent {
+    float: left;
+    width: 695px;
+    overflow: hidden;
+}
+
+.detailmsgbar .detailmsgbody .detailelse {
+    float: right;
+    width: 290px;
+}
+
+.webwindow {
+    border: solid 1px #D9D9D9;
+    box-shadow: 0 1px 4px #D9D9D9;
+    margin-bottom: 15px;
+}
+
+.webwindow .cap i {
+    color: #56afc1;
+    padding-right: 5px;
+    font-size: 18px;
+}
+
+.webwindow .cap .title {
+    float: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.webwindow .cap .action {
+    float: right;
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding-right: 15px;
+    font-size: 14px;
+}
+
+.webwindow .cap .action a {
+    color: #B7B7B7
+}
+
+.webwindow .cap .action a:hover {
+    color: #56afc1
+}
+
+.webwindow .cap {
+    height: 40px;
+    line-height: 40px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-left: 15px;
+    font-size: 16px;
+    border-bottom: solid 1px #D9D9D9;
+    background-color: #F0F0F0;
+}
+
+.webwindow .data {
+    min-height: 28px;
+    line-height: 28px;
+    padding: 15px;
+    background: #fff;
+}
+
+.webwindow .data-nopadding {
+    min-height: 28px;
+    line-height: 28px;
+    padding: 0px;
+    background: #fff;
+}
+
+.webwindow.close {
+    height: 35px;
+    overflow: hidden;
+}
+
+.webwindow.close .cap {
+    height: 35px;
+    border-bottom: none;
+}
+
+.webwindow #notesform #notes {
+    height: 50px;
+    width: 643px;
+    border: #DDDDDD solid 1px;
+    line-height: 25px;
+    outline: none;
+    border-radius: 4px;
+    padding: 10px;
+    max-width: 643px;
+    max-height: 100px;
+}
+
+.webwindow #notesform #notes:focus,
+.webwindow #notesform #notes:hover {
+    border: #56afc1 solid 1px;
+    box-shadow: 0 0 5px #56afc1;
+}
+
+.webwindow #notesform .notesbar {
+    line-height: 35px;
+    height: 35px;
+    overflow: hidden;
+}
+
+.webwindow #notesform .notesaction {
+    width: 500px;
+    float: left;
+    color: #C0C0C0;
+}
+
+.webwindow #notesform .notessubmit {
+    padding: 0 20px;
+    float: right;
+    color: #FFF;
+    background-color: #56afc1;
+    cursor: pointer;
+}
+
+.webwindow .favorite {
+    cursor: pointer;
+    height: 50px;
+    padding-left: 60px;
+    background: url(../images/webui/icon/favorite_no.png) no-repeat;
+}
+
+.webwindow .favorite.off {
+    background: url(../images/webui/icon/favorite.png) no-repeat
+}
+
+.webwindow .favorite .favorite_bt {
+    height: 35px;
+    line-height: 25px;
+    font-size: 16px;
+}
+
+.webwindow .favorite .favorite_have {
+    height: 15px;
+    line-height: 15px;
+    color: #C4C4C4;
+}
+
+.favorite_load {
+    background: url(../images/webui/image/loading.gif) right center no-repeat
+}
+
+.webwindow .favorite:hover .favorite_bt {
+    color: #C76300
+}
+
+.webwindow .favorite .favorite_have span {
+    color: #D90003
+}
+
+.mynotes {}
+
+.mynotes .node {
+    padding-top: 10px
+}
+
+.mynotes .headimg {
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    float: left;
+}
+
+.mynotes .nodeval {
+    line-height: 25px;
+    padding: 10px 15px;
+    width: 560px;
+    min-height: 50px;
+    float: right;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    border: #E7E7E7 solid 1px;
+    color: #434343;
+}
+
+.mynotes .nodeval:hover {
+    background-color: #f3f3f3;
+    color: #000;
+}
+
+.mynotes .nodearrow {
+    background: url(../images/webui/image/notesarrow.png) no-repeat left center;
+    height: 30px;
+    float: right;
+    width: 8px;
+}
+
+.mynotes .nodeaction {
+    padding-bottom: 5px;
+    height: 25px;
+    line-height: 25px;
+}
+
+.mynotes .nodeaction .time {
+    color: #FF6700;
+    float: left;
+    width: 150px;
+}
+
+.mynotes .nodeaction .action {
+    color: #FF6700;
+    float: right;
+    width: 400px;
+    text-align: right;
+    display: none;
+}
+
+.mynotes .action .delete {
+    color: #C9C9C9
+}
+
+.mynotes .action .delete:hover {
+    color: #E70003
+}
+
+.webwindow .book_recommend {
+    padding: 18px 0 0 0
+}
+
+.webwindow .about_recommend {
+    padding: 15px 0 0 0
+}
+
+.mynotes:hover .action {
+    display: block
+}
+
+.recommendnode {
+    float: left;
+    display: block;
+    width: 210px;
+    height: 150px;
+    overflow: hidden;
+    margin: 0 0 15px 16px;
+}
+
+.recommendbook {
+    float: left;
+    display: block;
+    width: 150px;
+    height: 245px;
+    overflow: hidden;
+    margin: 0 0 15px 19px;
+}
+
+.recommendbook .img {
+    width: 150px;
+    height: 210px;
+    display: block;
+    overflow: hidden;
+}
+
+.recommendnode .img {
+    width: 210px;
+    height: 115px;
+    display: block;
+    overflow: hidden;
+}
+
+.recommendbook .cap {
+    width: 150px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0px;
+    text-overflow: ellipsis;
+    color: #4F4F4F;
+    background-color: #fff;
+}
+
+.recommendnode .cap {
+    width: 210px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0px;
+    text-overflow: ellipsis;
+    color: #4F4F4F;
+    background-color: #fff;
+}
+
+.recommendbook:hover,
+.recommendnode:hover {
+    color: #56afc1
+}
+
+.recommendlist a,
+.usertrace a {
+    display: block;
+    height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: 0px;
+    text-overflow: ellipsis;
+}
+
+.recommendlist i,
+.usertrace i {
+    padding-right: 8px;
+    color: #56afc1;
+}
+
+.recommendlist a.hot {
+    color: #E10003
+}
+
+.recommendlist a.new {
+    color: #003BC5
+}
+
+.webwindow .tabwindowbar .tabchild:first-child {
+    margin-left: -15px;
+}
+
+.webwindow .tabwindowbar .tabchild {
+    white-space: nowrap;
+    padding: 0 15px 0 15px;
+    float: left;
+    border-right: #D4D4D4 solid 1px;
+    cursor: pointer;
+}
+
+.webwindow .tabwindowbar .tabchild.hover {
+    background-color: #fff;
+    box-shadow: 0 1px 0 #fff;
+}
+
+.notesmask {
+    position: absolute;
+    display: none;
+}
+
+.notesmask .notesmaskbg {
+    height: 100%;
+    width: 100%;
+    background: #fff;
+    opacity: 0.4;
+    filter: alpha(opacity=40);
+}
+
+.notesmask .notesmaskimg {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 10px;
+    margin-left: -30px;
+    margin-top: -30px;
+    background: url(../images/webui/image/loading.gif) no-repeat center #fff;
+}
+
+/* 二级页面 */
+.contentbar {}
+
+.contentbody {
+    width: 1000px;
+    margin: 0 auto;
+    height: 400px;
+}
+
+.contentbody img {
+    width: 1000px;
+    height: 400px;
+    overflow: hidden;
+}
+
+.contentlistbody {
+    width: 1000px;
+    margin: 0 auto;
+    padding-top: 15px;
+}
+
+.contentlistleft {
+    float: left;
+    width: 695px;
+    overflow: hidden;
+}
+
+.contentlistright {
+    float: right;
+    width: 290px;
+    overflow: hidden;
+}
+
+#flashcontent {
+    width: 1000px;
+    height: 500px;
+    background: #ccc;
+}
+
+.mycenterbar {
+    padding: 20px 0;
+    background-color: #f8f8f8;
+}
+
+.mycenterbody {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.mycenterleft {
+    float: left;
+    width: 200px;
+}
+
+.mycenterright {
+    float: right;
+    width: 785px;
+}
+
+.mycenterbody .menunode {
+    padding: 0 10px;
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: #ECECEC solid 1px;
+    font-size: 14px;
+}
+
+.mycenterbody .menunode:hover {
+    background-color: #f2f2f2;
+}
+
+.webwindow .menunode:last-child {
+    border: none;
+}
+
+.mycenterbody .menunode .icon {
+    display: block;
+    margin-top: 7px;
+    margin-right: 10px;
+    float: left;
+}
+
+.mycentermsg {
+    width: 500px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+.mycentermsg .userhead {
+    width: 152px;
+    height: 152px;
+    float: left;
+    overflow: hidden;
+}
+
+.mycentermsg .userhead img {
+    width: 150px;
+    height: 150px;
+    display: block;
+    border-radius: 75px;
+    border: #A8A8A8 solid 1px;
+}
+
+.mycentermsg .usermsg {
+    width: 320px;
+    float: right;
+}
+
+.mycentermsg .usermsg .lable {
+    width: 70px;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+    color: #AAAAAA;
+}
+
+.mycentermsg .usermsg .value {
+    width: 250px;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+}
+
+.mycenteruserelse {
+    padding: 30px 0 0 0;
+    background-color: #f9f9f9;
+}
+
+.mycenteruserelse .iconnode {
+    width: 170px;
+    height: 80px;
+    float: left;
+    margin-left: 25px;
+}
+
+.mycenteruserelse .img {
+    width: 50px;
+    height: 50px;
+    display: block;
+    float: left;
+}
+
+.mycenteruserelse .icondata {
+    width: 110px;
+    height: 70px;
+    float: right;
+}
+
+.mycenteruserelse .iconcap {
+    line-height: 1;
+    color: #8B8B8B;
+}
+
+.mycenteruserelse .iconval {
+    font-size: 24px;
+    color: #56afc1;
+    line-height: 40px;
+}
+
+.searchboxbar {
+    padding: 20px 0;
+    background-color: #f8f8f8;
+}
+
+.searchboxbody {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.searchboxbody .menu {
+    width: 85px;
+    float: left;
+}
+
+.searchboxbody .menu .node {
+    display: block;
+    height: 100px;
+    background: #fff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.searchboxbody .menu .node.hover {
+    background-color: #56afc1;
+    color: #fff;
+}
+
+.searchboxbody .menu .node img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.searchboxbody .searchboxlist {
+    width: 900px;
+    float: right;
+    background-color: #fff;
+    min-height: 500px;
+    box-shadow: 0 3px 4px #E0E0E0;
+}
+
+.searchboxbody .menubar {
+    border-bottom: #f5f5f5 solid 1px;
+    height: 50px;
+    line-height: 50px;
+}
+
+.searchboxbody .menubar .cap {
+    padding-left: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 300px;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.searchboxbody .menubar .sort {
+    padding-right: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 300px;
+    float: right;
+}
+
+.searchboxbody .menubar .sort a {
+    display: block;
+    float: right;
+    padding: 0 10px;
+}
+
+.searchboxbody .menubar .sort a.hover {
+    color: #56afc1;
+    line-height: 47px;
+    border-bottom: 3px solid #56afc1;
+}
+
+.searchvideolist {
+    min-height: 300px;
+    padding: 10px 0 15px 0px;
+}
+
+.searchvideolist.book .node,
+.searchvideolist .node {
+    float: left;
+    margin-left: 20px;
+    width: 200px;
+    height: 145px;
+    overflow: hidden;
+    margin-top: 25px;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 3px #C3C3C3;
+}
+
+.searchvideolist .book .node:hover,
+.searchvideolist .node:hover {
+    box-shadow: 0 0px 7px #0c5f6f
+}
+
+.searchvideolist.book.node .img,
+.searchvideolist .node .img {
+    width: 200px;
+    height: 110px;
+    display: block;
+    overflow: hidden;
+}
+
+.searchvideolist .book .node {
+    width: 150px;
+    height: 245px;
+    margin-left: 25px;
+}
+
+.searchvideolist .book .node .img {
+    width: 150px;
+    height: 210px;
+}
+
+.searchvideolist .book.node .cap,
+.searchvideolist .node .cap {
+    padding: 0 10px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #9E9E9E;
+}
+
+.page {
+    padding: 30px 0 0 0;
+    margin: 0;
+    box-sizing: content-box;
+    display: block;
+    text-align: center;
+    height: 60px;
+}
+
+.page a {
+    box-sizing: content-box;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    color: #9E9E9E;
+    text-align: center;
+    border: #C8C8C8 solid 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    background-color: #fff;
+}
+
+.page a.hover,
+.page a:hover {
+    background: #56afc1;
+    color: #fff;
+    border: #56afc1 solid 1px;
+}
+
+.nodata {
+    padding: 100px 0px;
+    line-height: 30px;
+    color: #BCBCBC;
+    text-align: center;
+    font-size: 24px;
+}
+
+.nodata div a {
+    color: #56afc1;
+    transition: all ease 200ms;
+}
+
+.nodata div a:hover {
+    padding-left: 20px;
+}
+
+.nodata img {
+    width: 90px;
+    height: 90px;
+    margin: 10px auto;
+    display: block;
+}
+
+.webwindow .mycenervideo {
+    padding: 18px 0px 5px 0;
+}
+
+.mycenervideo .node {
+    float: left;
+    display: block;
+    width: 180px;
+    height: 133px;
+    overflow: hidden;
+    margin: 0 0 10px 13px;
+}
+
+.mycenervideo .img {
+    width: 180px;
+    height: 98px;
+    display: block;
+    overflow: hidden;
+}
+
+.mycenervideo .cap {
+    width: 180px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0px;
+    text-overflow: ellipsis;
+    color: #4F4F4F;
+    background-color: #fff;
+}
+
+.mycenervideo .node:hover {
+    color: #56afc1
+}
+
+.mycenternotesnum {
+    position: absolute;
+}
+
+.mycenternotesnum div {
+    height: 30px;
+    padding: 0 10px;
+    line-height: 30px;
+    margin-top: -30px;
+    text-align: center;
+    color: #fff;
+    background: url(../images/webui/image/themecolor_0.8.png);
+}
+
+.empty-box {
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    color: #D3D3D3;
+    font-size: 24px;
+}
+
+.editpass {
+    width: 320px;
+    margin: 0 auto;
+    padding: 30px 0 150px 0;
+}
+
+.editpass .editpassimg {
+    display: block;
+    margin: 0 auto;
+}
+
+.editpasssubmit {
+    width: 150px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    margin: 0 auto;
+    background-color: #56afc1;
+    color: #fff;
+}
+
+.editpassmsg .node {
+    height: 35px;
+    padding: 10px 0 0 0;
+}
+
+.editpassmsg .lable {
+    float: left;
+    width: 80px;
+    color: #8E8E8E;
+}
+
+.editpassmsg .value {
+    float: left;
+}
+
+.editpassmsg .value .input {
+    outline: none;
+    height: 33px;
+    border: #DDDDDD solid 1px;
+    width: 200px;
+    padding: 0 10px;
+    border-radius: 8px;
+}
+
+.editpassmsg .value .input:focus,
+.editpassmsg .value .input:hover {
+    border: #7EC4D3 solid 1px;
+    box-shadow: 0 0 5px #56afc1;
+}
+
+.editpasssuber {
+    padding: 25px 0;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.editpassact {
+    height: 50px;
+    margin-top: -50px;
+    background: #D5E2EB;
+    display: none;
+}
+
+.editpassact .value {
+    height: 50px;
+    line-height: 50px;
+    padding: 0 20px;
+    text-align: center;
+    color: #434343;
+}
+
+.editpassact .value.error {
+    color: #E50003;
+    background: #FFEBEC;
+}
+
+.useredit .userinfo {
+    float: left;
+    width: 370px;
+    padding: 40px 10px 90px 110px;
+}
+
+.userheadinfo .selectfile,
+.userheadinfo .updatefile {
+    width: 100px;
+    margin: 10px auto 0 auto;
+    background-color: #56afc1;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    line-height: 35px;
+    height: 35px;
+}
+
+.useredit .userheadinfo {
+    float: left;
+    width: 152px;
+    padding: 70px 0 0 0;
+}
+
+.useredit .userhead {
+    height: 150px;
+    width: 150px;
+    display: block;
+    overflow: hidden;
+    border-radius: 75px;
+    border: #A8A8A8 solid 1px;
+}
+
+.editusermsg {}
+
+.editusermsg .node {
+    height: 35px;
+    padding: 10px 0 0 0;
+}
+
+.editusermsg .lable {
+    float: left;
+    width: 80px;
+    color: #8E8E8E;
+}
+
+.editusermsg .value {
+    float: left;
+}
+
+.editusermsg .value .input {
+    outline: none;
+    height: 33px;
+    border: #DDDDDD solid 1px;
+    width: 200px;
+    padding: 0 10px;
+    border-radius: 8px;
+}
+
+.editusermsg .value .input:focus,
+.editusermsg .value .input:hover {
+    border: #7EC4D3 solid 1px;
+    box-shadow: 0 0 5px #56afc1;
+}
+
+.edituseract {
+    width: 783px;
+    position: absolute;
+    height: 50px;
+    height: 50px;
+    margin-top: -50px;
+    background: #D5E2EB;
+    display: none;
+}
+
+.edituseract .value {
+    height: 50px;
+    line-height: 50px;
+    padding: 0 20px;
+    text-align: center;
+    color: #434343;
+}
+
+.edituseract .value.error {
+    color: #E50003;
+    background: #FFEBEC;
+}
+
+.editusersuber {
+    padding: 25px 0;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.editusersubmit {
+    width: 150px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    margin: 0 auto;
+    background-color: #56afc1;
+    color: #fff;
+}
+
+.usereditmask {
+    position: absolute;
+    width: 783px;
+    height: 30px;
+    z-index: 1;
+    display: none;
+}
+
+.usereditmaskbg {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: #000000;
+    opacity: 0.1;
+    filter: alpha(opacity=10);
+    z-index: 1;
+}
+
+.usereditmaskload {
+    position: absolute;
+    height: 70px;
+    width: 70px;
+    margin-left: -35px;
+    margin-top: -35px;
+    left: 50%;
+    top: 50%;
+    background: url(../images/webui/image/loading.gif) no-repeat center #FFFFFF;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+#userheadform .selectfile {
+    width: 100px;
+    height: 35px;
+    overflow: hidden;
+}
+
+#userheadform #headfile {
+    width: 100px;
+    height: 35px;
+    overflow: hidden;
+    position: absolute;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+/*个人中心 列表*/
+.mycenterlist .menubar {
+    border-bottom: #f5f5f5 solid 1px;
+    height: 50px;
+    line-height: 50px;
+}
+
+.mycenterlist .listcap {
+    padding-left: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 300px;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mycenterlist .classify {
+    padding-right: 15px;
+    font-size: 16px;
+    color: #56afc1;
+    width: 400px;
+    float: right;
+}
+
+.mycenterlist .classify a {
+    display: block;
+    float: right;
+    padding: 0 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mycenterlist .classify a.hover {
+    color: #56afc1;
+    line-height: 47px;
+    border-bottom: 3px solid #56afc1;
+}
+
+.mycenterlist .list a {
+    display: block;
+    padding: 0 30px 0 25px;
+    height: 50px;
+    border-bottom: #f2f2f2 solid 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: url(../images/webui/image/listlinkbg.png) no-repeat right;
+    font-size: 16px;
+}
+
+.mycenterlist .list a:hover {
+    background-color: #f5f5f5;
+}
+
+.mycenterlist .list a.hover,
+.mycenterlist .list .hover:hover {
+    border-left: #2F808A 3px solid;
+    padding: 0 30px 0 22px;
+    background-color: #fff;
+}
+
+.mycenterlist .listval {
+    min-height: 300px;
+    padding: 10px 0 15px 40px;
+}
+
+.mycenterlist .listval .node {
+    float: left;
+    margin-right: 25px;
+    width: 220px;
+    height: 180px;
+    overflow: hidden;
+    margin-top: 25px;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 3px #C3C3C3;
+    color: #9E9E9E;
+}
+
+.mycenterlist.book .listval {
+    padding-left: 50px;
+}
+
+.mycenterlist .listval .node:hover {
+    box-shadow: 0 0px 7px #0c5f6f;
+}
+
+.mycenterlist .listval .img {
+    width: 220px;
+    height: 120px;
+    display: block;
+    overflow: hidden;
+}
+
+.mycenterlist .listval .caption {
+    padding: 0 10px;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.mycenterlist .listval .notesnum {
+    height: 25px;
+    line-height: 15px;
+    padding-left: 10px;
+    color: #56afc1;
+    text-align: center;
+}
+
+.mycenterlist .listval .notesnum span {
+    color: #DF0003
+}
+
+.mycenterlist.book .listval .node {
+    width: 150px;
+    height: 270px;
+    margin-top: 25px;
+    margin-right: 30px;
+    overflow: hidden;
+}
+
+.mycenterlist.book .listval .node .img {
+    width: 150px;
+    height: 210px;
+}
+
+/*关于*/
+.articlevalue {
+    line-height: 30px;
+    padding: 10px 40px 50px 40px;
+    font-size: 16px;
+}
+
+.articlevalue .aboutimg {
+    margin-top: 20px;
+}
+
+.articlevalue p {
+    margin-top: 15px;
+}
+
+p.culturecap {
+    font-weight: bold;
+    font-size: 18px;
+    color: #006B8C;
+}
+
+p.cultureval {
+    margin-top: 10px;
+}
+
+.corevalues {
+    padding-top: 50px;
+}
+
+.corevalues .partnode {
+    width: 335px;
+    float: left;
+    padding: 20px 0;
+}
+
+.corevalues .partnode.hover {
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+
+.corevalues .partnode img {
+    display: block;
+    height: 70px;
+    width: 70px;
+    margin: 0 auto;
+}
+
+.corevalues .partnodecap {
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 18px;
+    color: #232323;
+    padding-top: 10px;
+}
+
+.corevalues .partnodeval {
+    color: #969696;
+    font-size: 14px;
+    text-align: center;
+}
+
+.cooperationtable {
+    padding-top: 20px;
+}
+
+.cooperationimg {
+    padding: 10px 0 10px 100px;
+    margin-bottom: 20px;
+    background: url(../images/webui/icon/servers.png) no-repeat #f6f6f6 center left;
+    border-radius: 10px;
+}
+
+.cooperationtable table {
+    border-bottom: #DCDCDC solid 1px;
+    border-right: #DCDCDC solid 1px;
+    line-height: normal;
+    padding: 0;
+    margin: 0;
+    line-height: 30px;
+}
+
+.cooperationtable table th {
+    background-color: #f2f2f2;
+}
+
+.cooperationtable table .bar {
+    border-bottom: #DCDCDC solid 1px;
+}
+
+.cooperationtable table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.cooperationtable table td,
+.cooperationtable table th {
+    border-top: #DCDCDC solid 1px;
+    border-left: #DCDCDC solid 1px;
+    vertical-align: auto;
+}
+
+/*百度地图开始*/
+.iw_poi_title {
+    color: #CC5522;
+    font-size: 14px;
+    font-weight: bold;
+    overflow: hidden;
+    padding-right: 13px;
+    white-space: nowrap
+}
+
+.iw_poi_content {
+    font: 12px arial, sans-serif;
+    overflow: visible;
+    padding-top: 4px;
+    white-space: -moz-pre-wrap;
+    word-wrap: break-word
+}
+
+/*百度地图结束*/
+.mapontent {
+    margin-top: 20px;
+    width: 670px;
+    height: 340px;
+    border: 1px solid rgb(204, 204, 204);
+}
+
+.loginbar {
+    min-height: 440px;
+    background: url(../images/webui/image/loginbg.png) center no-repeat #f4d84e;
+}
+
+.loginbar .loginiframe {
+    width: 1000px;
+    padding: 20px 0;
+    margin: 0 auto;
+}
+
+.loginbar .closemask {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    z-index: 1;
+    background: #fff;
+    margin-left: 950px;
+}
+
+.loginbar .loginiframe iframe {
+    background: url(../images/webui/image/loading.gif) no-repeat center #fff;
+    margin-left: 650px;
+    transition: height ease 200ms;
+}
+
+.newsbar {
+    background: #f5f5f5;
+    min-width: 1000px;
+    padding: 15px;
+}
+
+.newsbar .newsbody {
+    position: relative;
+    width: 1000px;
+    margin: 0 auto;
+    background: url(../images/webui/image/vallistbg.png) repeat-y #fff;
+    min-height: 500px;
+    height: 700px;
+    box-shadow: 0px 2px 3px #ddd;
+}
+
+.newsbar .newsbody .newslist {
+    width: 249px;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.newsbar .newsbody .newsiframebar {
+    position: absolute;
+    right: 0px;
+    top: 0;
+    bottom: 0;
+    width: 750px;
+    height: 700px;
+    background: #E7E7E7;
+}
+
+.newsbar .newsbody .newslistdata {
+    overflow: hidden;
+    position: relative;
+    top: 0px;
+    bottom: 0px;
+    z-index: 0;
+}
+
+.newsbar .newsbody .newslistdata .node {
+    border-bottom: solid 1px #eeeeee;
+    display: block;
+    padding: 10px 25px 10px 10px;
+    display: block;
+    cursor: pointer;
+}
+
+.newsbar .newsbody .loadmore {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 34px;
+    line-height: 34px;
+    border-top: #eeeeee solid 1px;
+    text-align: center;
+    background-color: #fff;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.newsbar .newsbody .newstitle {
+    height: 34px;
+    line-height: 34px;
+    padding-left: 10px;
+    border-bottom: #eeeeee solid 1px;
+    position: absolute;
+    right: 0px;
+    left: 0;
+    z-index: 2;
+    font-weight: 800;
+    color: #404040;
+    background-color: #fff;
+}
+
+.newsbar .newsbody .newslist_body {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    right: 0;
+    bottom: 35px;
+}
+
+.newslistdata {
+    height: 500px;
+}
+
+.newslistdata .node .title {
+    width: 210px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 30px;
+    line-height: 30px;
+}
+
+.newslistdata .node .statebar {
+    height: 25px;
+    line-height: 25px;
+    color: #CCC;
+}
+
+.newslistdata .node .statebar span {
+    color: #999;
+}
+
+.newslistdata .news_active {
+    background: #47a0b4;
+}
+
+.newslistdata .news_active .title {
+    color: #ffffff;
+}
+
+.newslistdata .statebar .sina {
+    background: url(../images/webui/icon/sinaicon.png) no-repeat right center;
+    padding-right: 20px;
+}
+
+.newslistdata .statebar .wechat {
+    background: url(../images/webui/icon/wechaticon.png) no-repeat right center;
+    padding-right: 20px;
+}
+
+.news_loading_list {
+    background: url(../images/webui/image/news_loading_list.gif) center no-repeat;
+}
+
+.news_loading_button {
+    background: url(../images/webui/image/news_loading_button.gif) center no-repeat;
+}
+
+.linktable_div {
+    background: #f5f5f5;
+    min-width: 1000px;
+    padding: 15px;
+}
+
+.linktable_body {
+    width: 970px;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0px 2px 3px #ddd;
+    min-height: 500px;
+    padding: 15px;
+}
+
+.linktable_table {
+    margin-bottom: 15px;
+}
+
+.link_table_main {
+    background: url(../images/webui/image/link_table_bg.png) repeat-y;
+}
+
+.link_table_title {
+    background: #54a7b7;
+    color: #fff;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 25px;
+    letter-spacing: 3px;
+}
+
+.link_table_main a {
+    display: block;
+    float: left;
+    width: 184px;
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: center;
+    line-height: 32px;
+    height: 32px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.link_table_main a span {
+    display: inline-block;
+    background: url(../images/webui/icon/start.png) no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+}
+
+.link_table_title span {
+    display: inline-block;
+    background: url(../images/webui/icon/start.png) no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+}
+
+.qa_body_ie {
+    padding: 20px;
+}
+
+.qa_ie_top {
+    font-weight: bold;
+    font-size: 16px;
+    color: #555;
+}
+
+.qa_ie_title {
+    font-weight: bold;
+    height: 50px;
+    color: #555;
+}
+
+.qa_ie_picture {
+    display: block;
+    margin: auto;
+}
+
+.qa_body_app {
+    padding: 20px;
+    line-height: 30px;
+}
+
+.qa_app_title {
+    font-size: 18px;
+    font-weight: bold;
+    width: 600px;
+    margin: auto;
+}
+
+.qa_app_title span {
+    color: #54a7b7;
+}
+
+.qa_app_txt {
+    line-height: 23px;
+    width: 600px;
+    margin: auto;
+    margin-top: 10px;
+}
+
+.qa_app_validate {
+    float: left;
+    width: 330px;
+}
+
+.qa_app_validate input {
+    float: left;
+}
+
+.qa_app_care {
+    line-height: 25px;
+}
+
+.qa_app_pass {
+    margin-top: 10px;
+}
+
+.qa_app_validate input {
+    background: #54a7b7;
+    border: none;
+    width: 216px;
+    height: 30px;
+    padding-left: 5px;
+    color: #b9d4dc;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    line-height: 30px;
+}
+
+.qa_app_validate input::-webkit-input-placeholder {
+    color: #b9d4dc;
+}
+
+.qa_app_validate input:-moz-placeholder {
+    color: #b9d4dc;
+}
+
+.qa_app_validate input:-ms-input-placeholder {
+    color: #b9d4dc;
+}
+
+.qa_app_mail {
+    display: block;
+    width: 80px;
+    height: 32px;
+    background: #00848c;
+    color: #fff;
+    text-align: center;
+    float: left;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.qa_app_btn {
+    float: right;
+    padding-top: 23px;
+}
+
+.qa_app_btn a {
+    display: block;
+    width: 70px;
+    height: 70px;
+    background: #35495a;
+    color: #fff;
+    line-height: 70px;
+    text-align: center;
+    border-radius: 35px;
+}
+
+.qa_app_box {
+    width: 430px;
+    margin: auto;
+    margin-top: 30px;
+}
+
+.qa_app_download {
+    width: 500px;
+    height: 226px;
+    background: #e6e6e6;
+    margin: auto;
+    margin-top: 50px;
+    padding: 0px 50px 0px 50px;
+}
+
+.qa_app_download .qa_app_download_down {
+    float: left;
+    margin-left: 56px;
+    text-align: center;
+    margin-top: 30px;
+    width: 180px;
+}
+
+.qa_app_download .qa_app_download_down a {
+    display: block;
+    width: 110px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    color: #fff;
+    background: #54a7b7;
+    margin: auto;
+    margin-top: 8px;
+}
+
+.qa_app_download img {
+    display: block;
+}
+
+.qa_app_download .qa_app_images {
+    width: 100px;
+    float: left;
+    margin-top: 32px;
+}
+
+.qa_app_download .qa_app_wechat {
+    width: 108px;
+    float: right;
+    margin-top: 59px;
+}
+
+.detail_book_div {
+    width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 260px;
+}
+
+.detail_book_left {
+    width: 387px;
+    height: 160px;
+    background: #35495a;
+    padding: 0px 30px 0px 30px;
+    float: left;
+    margin-top: 50px;
+}
+
+.detail_book_left .qa_app_download_down {
+    color: #fff;
+    float: left;
+    margin-left: 33px;
+    text-align: center;
+    margin-top: 26px;
+    width: 180px;
+    line-height: 20px;
+}
+
+.detail_book_left .qa_app_download_down a {
+    width: 90px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    color: #fff;
+    background: #54a7b7;
+    margin: auto;
+    margin-top: 8px;
+    display: block;
+}
+
+.detail_book_left img {
+    display: block;
+}
+
+.detail_book_left .qa_app_images {
+    width: 70px;
+    float: left;
+    margin-top: 23px;
+}
+
+.detail_book_left .qa_app_wechat {
+    width: 70px;
+    float: right;
+    margin-top: 45px;
+}
+
+.detail_book_right {
+    width: 387px;
+    height: 160px;
+    background: #54a7b7;
+    padding: 0px 30px 0px 30px;
+    float: right;
+    margin-top: 50px;
+    display: block;
+    cursor: pointer;
+}
+
+.datail_book_qa img {
+    width: 73px;
+    float: left;
+    margin-top: 43px;
+    margin-left: 43px;
+}
+
+.datail_book_txt {
+    color: #fff;
+    line-height: 25px;
+    margin-top: 55px;
+    float: left;
+    margin-left: 35px;
+}
+
+
+
+
+
+@media only screen and (max-width:1000px) {
+    .focusbar .focusbody {
+        left: 0px;
+        margin-left: 0px;
+    }
+}

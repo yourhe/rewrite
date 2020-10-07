@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/valyala/fasthttp"
+	// proxycontext "gitlab.iyorhe.com/wfgz/reverseproxy/context"
 )
 
 type RewriteRule int
@@ -22,15 +23,17 @@ const (
 	Subfix
 	StrictTransportSecurity
 	AccessControlAllowOrigin
+	XFrameOptonis
 )
 
 type HeaderRewriter struct {
-	Prefix           string
-	Rules            map[string]RewriteRule
-	Urlrw            Rewriter
-	Cookierw         Rewriter
-	RewritingContent bool
-	req              *http.Request
+	Prefix                    string
+	Rules                     map[string]RewriteRule
+	Urlrw                     Rewriter
+	Cookierw                  Rewriter
+	RewritingContent          bool
+	req                       *http.Request
+	GetLastOriginContextKeyFn func(*http.Request) string
 }
 
 func NewHeaderRewriter(configs ...func(cfg *Config)) *HeaderRewriter {
@@ -60,6 +63,11 @@ func (hrw *HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 		// 	newkey, newval := hrw.rewriteHeader(key, headers.Get(key))
 		// 	rewritten.Add(newkey, newval)
 		// }
+	}
+	//如果服务端不反悔AccessAllowOrigin ，动态追加
+	lastOrigin := hrw.GetLastOriginContextKeyFn(hrw.req)
+	if headers.Get("Access-Control-Allow-Origin") == "" && lastOrigin != "" {
+		rewritten.Set("Access-Control-Allow-Origin", lastOrigin)
 	}
 	return rewritten
 }
@@ -125,7 +133,23 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 		if value == "*" {
 			return name, value
 		}
+		fmt.Println("AccessControlAllowOrigin")
+		// fmt.Println()
+		lastOrigin := hrw.GetLastOriginContextKeyFn(hrw.req)
+		if lastOrigin != "" {
+			return name, lastOrigin
+		}
+		fmt.Println(hrw.req.Header.Get("Referer"))
+		fmt.Println(hrw.req.Header.Get("Origin"))
+		fmt.Println(hrw.req.Header.Get("Origin"))
+		fmt.Println(hrw.GetLastOriginContextKeyFn(hrw.req))
+		fmt.Println(hrw.GetLastOriginContextKeyFn(hrw.req))
+		fmt.Println(hrw.req.Referer())
 		if hrw.Urlrw != nil {
+			referer := hrw.req.Header.Get("Referer")
+			if referer != "" {
+				value = referer
+			}
 			v := hrw.Urlrw.Rewrite([]byte(value))
 			uri := fasthttp.AcquireURI()
 			uri.Parse(nil, v)
@@ -143,6 +167,8 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 		// only from www.emerald.com
 
 		return name + "GGG", "*"
+	case XFrameOptonis:
+		return "_D_" + name, value + ",ALLOW-FROM=*"
 	}
 	return name, value
 }
@@ -219,6 +245,6 @@ var DefaultHeaderRewriters = map[string]RewriteRule{
 
 	"Www-Authenticate": Keep,
 
-	"X-Frame-Options":  Prefix,
+	"X-Frame-Options":  XFrameOptonis,
 	"X-Xss-Protection": Prefix,
 }

@@ -130,9 +130,9 @@ func TestWOSUrlsinRewriter(t *testing.T) {
 
 func TestWOSNewUrlsinRewriter(t *testing.T) {
 	cases := stringTestCases([]stringTestCase{
-		{"http://.www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
-		{"https://www.webofknowledge.com?", "https://www.webofknowledge.com.wf?__dp=https"},
-		{"http://www.webofknowledge.com:84?", "https://www.webofknowledge.com.wf?__dp=http|84"},
+		{"http://.www.webofknowledge.com?", "http://www.webofknowledge.com.wf"},
+		{"https://www.webofknowledge.com?", "http://www.webofknowledge.com.wf?__dp=https"},
+		{"http://www.webofknowledge.com:84?", "http://www.webofknowledge.com.wf?__dp=http|84"},
 		{"//www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
 		{"/a/b?", "/a/b?"},
 		{"a/b?", "a/b?"},
@@ -140,12 +140,34 @@ func TestWOSNewUrlsinRewriter(t *testing.T) {
 		{"https://images.drcnet-sod.com/javascript/jquery.min.js", "https://images.drcnet-sod.com.wf/javascript/jquery.min.js?__dp=https"},
 		{"https://onlinelibrary.wiley.com/action/ajaxShowPubInfo?accordionHeadingWrapper=h2&ajax=true&displayAlmetricDropzone=true&displayCitedByLink=true&doi=10.1002%2Fjps.23423&pbContext=%3BrequestedJournal%3Ajournal%3A15206017%3Barticle%3Aarticle%3Adoi%5C%3A10.1002%2Fjps.23423%3Bpage%3Astring%3AArticle%2FChapter+View%3Bctype%3Astring%3AJournal+Content%3BsubPage%3Astring%3AAbstract%3Bwebsite%3Awebsite%3Apericles%3Bjournal%3Ajournal%3A19302169%3Bissue%3Aissue%3Adoi%5C%3A10.1002%2Fjps.v102.3%3Bwgrou", "a"},
 	})
-	rw := NewURLRewriter("https://www.webofknowledge.com/abc/d", "wf:80", "http", true, 0)
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/d", "wf", "http", true, 0)
+	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
+	// rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases)
+}
+func TestPortAndProtocolToDomianNewUrlsinRewriter(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://www.webofknowledge.com:80", "http://h-port-80.www.webofknowledge.com.wf"},
+		{"http://www.webofknowledge.com", "http://h-port-80.www.webofknowledge.com.wf"},
+		{"https://www.webofknowledge.com", "http://hs.www.webofknowledge.com.wf"},
+	})
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/d", "wf", "http", true, 0)
 	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
 	// rw.ProtocolOnQuery(true)
 	testRewriteCases(t, rw, cases)
 }
 
+func TestPortAndProtocolToPreduceathNewUrlsinRewriter(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"http://www.webofknowledge.com:80", "http://wf/--/com/webofknowledge/www/_/?__dp=http|80"},
+		{"http://www.webofknowledge.com", "http://wf/--/com/webofknowledge/www/_/"},
+		{"https://www.webofknowledge.com", "http://wf/--/com/webofknowledge/www/hs/_/?__dp=https"},
+	})
+	rw := NewURLRewriter("https://www.webofknowledge.com/abc/d", "wf", "http", true, 1)
+	// rw := NewUrlRewriter("//www.webofknowledge.com", "http://${host}.wf")
+	// rw.ProtocolOnQuery(true)
+	testRewriteCases(t, rw, cases)
+}
 func TestWOSNewUrlsinRewriterProcessRelative(t *testing.T) {
 	cases := stringTestCases([]stringTestCase{
 		{"http://.www.webofknowledge.com?", "https://www.webofknowledge.com.wf"},
@@ -206,13 +228,40 @@ func TestNGTemplate(t *testing.T) {
 
 	cases := stringTestCases([]stringTestCase{
 		{"/../detail/{{s.gui}}?view=detailed", ""},
+		{"../detail/{{s.gui}}?view=detailed", ""},
+		{"https://www.sciencedirect.com", ""},
 	})
-	rw := NewURLRewriterRelativePath("http://www.specialsci.cn/searchresult/a?complex=%2Basp&from=Fast", "wf", "http", true, 0)
+	rw := NewURLRewriterRelativePath("http://www.specialsci.cn/searchresult/a?complex=%2Basp&from=Fast", "wf:8989", "http", true, 0)
 
 	testRewriteCases(t, rw, cases)
 	u := fasthttp.AcquireURI()
 	u.Parse(nil, []byte("http://www.specialsci.cn/detail/202001100740289732848460?view=detailed"))
 	u.Update("app/app.1b070094.js")
 	fmt.Println(u.String())
+
+}
+
+func TestCNKI(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"//bianke.cnki.net/adfiles/ad/R018.js?sc=B024", ""},
+	})
+	rw := NewURLRewriterRelativePath("https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDAUTO&filename=HNXB202009019&v=MDA1NjZZUzdEaDFUM3FUcldNMUZyQ1VSN3FmWU9Sb0Z5dmtVN3JPTFNQVGJMRzRITkhNcG85RWJZUjhlWDFMdXg=", "wf", "http", true, 1)
+	testRewriteCases(t, rw, cases)
+
+}
+
+func TestQdexam(t *testing.T) {
+	cases := stringTestCases([]stringTestCase{
+		{"/js/home.js?v=1.3", "http://www.qdexam.com.wf/js/home.js?v=1.3"},
+		{"js/home.js?v=1.3", "http://www.qdexam.com.wf/js/home.js?v=1.3"},
+	})
+	rw := NewURLRewriterRelativePath("http://www.qdexam.com/main", "wf", "http", true, 0)
+	testRewriteCases(t, rw, cases)
+	cases = stringTestCases([]stringTestCase{
+		{"/js/home.js?v=1.3", "http://wf/--/com/qdexam/www/_/js/home.js?v=1.3"},
+		{"js/home.js?v=1.3", "http://wf/--/com/qdexam/www/_/js/home.js?v=1.3"},
+	})
+	rw = NewURLRewriterRelativePath("http://www.qdexam.com/main", "wf", "http", true, 1)
+	testRewriteCases(t, rw, cases)
 
 }

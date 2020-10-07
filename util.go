@@ -46,10 +46,16 @@ func ToSWLetDigHyp(host string, protocol string) string {
 }
 
 func ToSWReduceLetDigHyp(host string, protocol string) string {
+	return toSWReduceLetDigHyp(host, protocol, true)
+}
+func NotProcessProtocolToSWReduceLetDigHyp(host string, protocol string) string {
+	return toSWReduceLetDigHyp(host, protocol, false)
+}
+func toSWReduceLetDigHyp(host string, protocol string, processProtocol bool) string {
 	if protocol == "" {
 		protocol = "http"
 	}
-	h, _, _ := VaildHTTPPort(host)
+	h, p, _ := VaildHTTPPort(host)
 	for {
 		if h[0] == '.' {
 			h = h[1:]
@@ -73,7 +79,27 @@ func ToSWReduceLetDigHyp(host string, protocol string) string {
 		rh[j] = t
 	}
 	h = strings.Join(rh, "/")
+
+	protocol = strings.Replace(protocol, "http", "h", -1)
+	if p != "" {
+		protocol = protocol + "-port-" + p
+
+	}
+	if formatBProtocol(protocol) != "" && processProtocol {
+		h = h + "/" + protocol
+
+	}
 	return h
+}
+
+func formatBProtocol(protocol string) string {
+	switch protocol {
+	case "h", "h-port-80":
+		return ""
+	case "hs-port-443":
+		protocol = "hs"
+	}
+	return protocol
 }
 
 //VaildHTTPPort host中存在port返回true

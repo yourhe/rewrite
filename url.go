@@ -233,6 +233,7 @@ func FormatProtocol(u *fasthttp.URI) string {
 	protocol := u.Scheme()
 	return fmt.Sprintf("%s%s", protocol, port)
 }
+
 func NewHostRelativeUrlRewriter(from string) *UrlRewriter {
 	f, err := url.Parse(from)
 	if err != nil {
