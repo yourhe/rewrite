@@ -243,7 +243,8 @@ func TestNGTemplate(t *testing.T) {
 
 func TestCNKI(t *testing.T) {
 	cases := stringTestCases([]stringTestCase{
-		{"//bianke.cnki.net/adfiles/ad/R018.js?sc=B024", ""},
+		// {"//bianke.cnki.net/adfiles/ad/R018.js?sc=B024", ""},
+		{"Common/RedirectPage?sfield=FN&", "Common/RedirectPage?sfield=FN&"},
 	})
 	rw := NewURLRewriterRelativePath("https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDAUTO&filename=HNXB202009019&v=MDA1NjZZUzdEaDFUM3FUcldNMUZyQ1VSN3FmWU9Sb0Z5dmtVN3JPTFNQVGJMRzRITkhNcG85RWJZUjhlWDFMdXg=", "wf", "http", true, 1)
 	testRewriteCases(t, rw, cases)
