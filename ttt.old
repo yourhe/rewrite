@@ -1,0 +1,62 @@
+func readRegexStrEnd(str string) int {
+	i := strings.Index(str, "/")
+	if i < 1 {
+		return i
+	}
+	if str[i-1] == '\\' {
+		n := readRegexStrEnd(str[i+1:])
+		if n > -1 {
+			return i + n + 1
+		}
+		return -1
+	}
+	return i
+}
+
+func readAttrName(src string) (name string, regex *regexp.Regexp, rwfn Rewriter, err error) {
+	name = src
+	i := strings.Index(src, "/")
+	if i > -1 { //has regext
+		j := readRegexStrEnd(src[i+1:])
+		if j > -1 {
+			name = src[:i]
+			rgStr := src[i+1 : i+1+j]
+			regex, err = regexp.Compile(rgStr)
+
+			r := readRegexStrEnd(src[i+1+j+1:])
+			if r > -1 { // has replace
+				replaceStr := src[i+1+j+1 : i+1+j+1+r]
+				rwfn = &RegexRewriter{
+					Re: regex,
+					Rw: RewriteFunc(func(in []byte) []byte {
+						return regex.ReplaceAll(in, []byte(replaceStr))
+						return []byte("-" + replaceStr + "-")
+					}),
+				}
+			}
+		}
+
+		// j := strings.LastIndex(src, "/")
+
+	}
+
+	// i = strings.Index(src, ":")
+	// if i > -1 && src[len(src)-1] == ':' {
+	// 	name = src[:i]
+	// 	j := strings.LastIndex(src, "/")
+	// 	rgStr := src[i+1 : j]
+	// 	regex, err = regexp.Compile(rgStr)
+	// 	rwfn = &RegexRewriter{
+	// 		Re: regex,
+	// 		Rw: RewriteFunc(func(in []byte) []byte {
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			return in
+	// 		}),
+	// 	}
+	// 	return
+	// }
+	return
+}

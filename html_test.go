@@ -89,16 +89,17 @@ func TestCnkiHome(t *testing.T) {
 
 func TestRewriteMetaContent(t *testing.T) {
 	var raw = `<meta http-equiv="REFRESH" href="http://www.baidu.com" content="0; URL=https://x.cnki.net/search">
-	<meta http-equiv="REFRESH" content="0; URL=https://dx.doi.org/10.1108/09685220310468628"/> 
+	<meta http-equiv="REFRESH" content="0; url=https://dx.doi.org/10.1108/09685220310468628"/> 
 	<meta http-equiv="refresh" content="0;URL=&#39;https://dx.doi.org/10.1108/09685220310468628&#39;"/>    
 
   <a href="https://www.baidu.com">a</a>
   `
 	f := bytes.NewBufferString(raw)
 	r := NewRewriteReader(f)
-	urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 1)
+	// urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 1)
+	urlRewrite := NewURLRewriterRelativePath("http://dx.doi.org", "iyoerhe.com", "https", true, 1)
 	// r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, "href", urlRewrite)
-	r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, `content/\d+;\s?URL=["']?(.+)["']?/`, urlRewrite)
+	r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, `content/\d+;\s?url=["']?(.+)["']?/`, urlRewrite)
 	r.SetTagRewriter(`meta[http-equiv="refresh"]`, `content/\d+;\s?URL=['"](.+)["']/`, urlRewrite)
 	r.SetTagRewriter(`a`, "href", urlRewrite)
 	b, err := ioutil.ReadAll(r)
@@ -189,6 +190,9 @@ func TestBdCnkiNetData(t *testing.T) {
 	f, _ := os.Open("./testdata/bd.cnki.net.html")
 	defer f.Close()
 	r := NewRewriteReader(f)
+	urlRewrite := NewURLRewriter("http://x.cnki.net", "iyoerhe.com", "https", false, 1)
+	r.SetTagRewriter(`script`, "src", urlRewrite)
+
 	r.AddInsert("head", `<lin1eak></l1ink>`, true)
 	r.AddInsert("head", `<li2nk></li2nk>`, true)
 	var b []byte
@@ -348,3 +352,31 @@ func Test(t *testing.T) {
 func IsDig(char rune) bool {
 	return char > 47 && char < 58
 }
+
+func Test_readRegexStrEnd(t *testing.T) {
+	// str := "aaa/\\/aa\\//"
+	// i := readRegexStrEnd(str)
+	// fmt.Println(i, string(str[i]))
+	// attr := "content/(script-src[^;]+;)/********/"
+	// n, r, f, e := readAttrName(attr)
+	// fmt.Println(n, r, f, e)
+	// fmt.Println(string(f.Rewrite([]byte("default-src *; script-src &#39;unsafe-inline&#39; &#39;unsafe-eval&#39; &#39;self&#39; *.zhangyue.com *.ireader.com *.zhangyue01.com *.163yun.com *.163.com localhost *.126.net *.126.com *.netease.com *.qq.com *.gtimg.cn *.baidu.com *.bdstatic.com *.hicloud.com *.baidustatic.com; style-src * &#39;unsafe-inline&#39;; img-src * data: ; frame-src &#39;self&#39; *.zhangyue.com *.zhangyue01.com *.ireader.com *.alipay.com *.gtimg.cn *.qq.com *.baidu.com zhangyueireader: weixin:;"))))
+
+	var raw = `
+	<meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'unsafe-inline' 'unsafe-eval' 'self' *.zhangyue.com *.ireader.com *.zhangyue01.com *.163yun.com *.163.com localhost *.126.net *.126.com *.netease.com *.qq.com *.gtimg.cn *.baidu.com *.bdstatic.com *.hicloud.com *.baidustatic.com; style-src * 'unsafe-inline'; img-src * data: ; frame-src 'self' *.zhangyue.com *.zhangyue01.com *.ireader.com *.alipay.com *.gtimg.cn *.qq.com *.baidu.com zhangyueireader: weixin:;"/>
+  `
+	f := bytes.NewBufferString(raw)
+	r := NewRewriteReader(f)
+	// urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 1)
+	urlRewrite := NewURLRewriterRelativePath("http://dx.doi.org", "iyoerhe.com", "http", true, 0)
+	// r.SetTagRewriter(`meta[http-equiv="REFRESH"]`, "href", urlRewrite)
+	r.SetTagRewriter(`meta[http-equiv="Content-Security-Policy"]`, `content/(script-src [^;]+)/script-src 'unsafe-inline' 'unsafe-eval' 'self' */`, urlRewrite)
+	r.SetTagRewriter(`meta[http-equiv="Content-Security-Policy"]`, `content/(frame-src [^;]+)/frame-src 'self' */`, urlRewrite)
+	// r.SetTagRewriter(`meta[http-equiv="Content-Security-Policy"]`, `href`, urlRewrite)
+	// r.SetTagRewriter(`meta[http-equiv="refresh"]`, `href`, urlRewrite)
+	// r.SetTagRewriter(`meta[http-equiv="refresh"]`, "href/(.*)/$1--ggg/", urlRewrite)
+	b, err := ioutil.ReadAll(r)
+	fmt.Println(string(b), err)
+}
+
+// <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'unsafe-inline' 'unsafe-eval' 'self' *.zhangyue.com *.ireader.com *.zhangyue01.com *.163yun.com *.163.com localhost *.126.net *.126.com *.netease.com *.qq.com *.gtimg.cn *.baidu.com *.bdstatic.com *.hicloud.com *.baidustatic.com; style-src * 'unsafe-inline'; img-src * data: ; frame-src 'self' *.zhangyue.com *.zhangyue01.com *.ireader.com *.alipay.com *.gtimg.cn *.qq.com *.baidu.com zhangyueireader: weixin:;"/>

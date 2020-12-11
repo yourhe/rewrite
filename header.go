@@ -3,6 +3,7 @@ package rewrite
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -24,6 +25,7 @@ const (
 	StrictTransportSecurity
 	AccessControlAllowOrigin
 	XFrameOptonis
+	Refresh
 )
 
 type HeaderRewriter struct {
@@ -65,6 +67,9 @@ func (hrw *HeaderRewriter) RewriteHeaders(headers http.Header) http.Header {
 		// }
 	}
 	//如果服务端不反悔AccessAllowOrigin ，动态追加
+	if hrw.GetLastOriginContextKeyFn == nil {
+		return rewritten
+	}
 	lastOrigin := hrw.GetLastOriginContextKeyFn(hrw.req)
 	if headers.Get("Access-Control-Allow-Origin") == "" && lastOrigin != "" {
 		rewritten.Set("Access-Control-Allow-Origin", lastOrigin)
@@ -85,13 +90,21 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 	switch hrw.Rules[name] {
 	case Keep:
 		return name, value
+	case Refresh:
+		re, err := regexp.Compile(`.*?(?:URL|url)\s*=\s*(.+?)`)
+		if hrw.Urlrw != nil && err == nil {
+			match := re.FindAllStringSubmatchIndex(value, -1)
+			if len(match) > 0 {
+				v := hrw.Urlrw.Rewrite([]byte(value[match[0][2]:]))
+				return name, value[:match[0][2]] + string(v)
+			}
+
+		}
+		return name, value
 	case UrlRewrite:
 
 		if hrw.Urlrw != nil {
-			fmt.Println(name, value)
 			v := hrw.Urlrw.Rewrite([]byte(value))
-			fmt.Println(name, string(v))
-
 			return name, string(v)
 		}
 		return name, value
@@ -130,7 +143,7 @@ func (hrw HeaderRewriter) rewriteHeader(name, value string) (string, string) {
 	case StrictTransportSecurity:
 		return "Strict-Transport-Security", "max-age=0; includeSubDomains"
 	case AccessControlAllowOrigin:
-		if value == "*" {
+		if value == "*" || hrw.GetLastOriginContextKeyFn == nil {
 			return name, value
 		}
 		fmt.Println("AccessControlAllowOrigin")
@@ -247,4 +260,5 @@ var DefaultHeaderRewriters = map[string]RewriteRule{
 
 	"X-Frame-Options":  XFrameOptonis,
 	"X-Xss-Protection": Prefix,
+	"Refresh":          Refresh,
 }

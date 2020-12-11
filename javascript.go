@@ -2,6 +2,7 @@ package rewrite
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 
@@ -45,4 +46,16 @@ func (jr *JavaScriptRewrite) Read(p []byte) (n int, err error) {
 	}
 	// jsast.
 	return jr.walker.Read(p)
+}
+
+func (jr *JavaScriptRewrite) Rewrite(i []byte) (o []byte) {
+	jsr := NewJavaScriptRewrite()
+	jsr.NewReader(bytes.NewBuffer(i))
+	w := bytes.NewBuffer(nil)
+
+	_, err := io.Copy(w, jsr)
+	if err != nil {
+		return i
+	}
+	return w.Bytes()
 }

@@ -34,6 +34,7 @@ func NewURLRewriterRelativePath(baseURI, host, protocol string, protocolOnQuery 
 		processRelativePath: true,
 	}
 }
+
 func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
 	p = bytes.TrimPrefix(p, []byte("&#xD;"))
 	p = bytes.TrimPrefix(p, []byte("&#xA;"))
@@ -54,6 +55,7 @@ func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
 	switch {
 	case urw.mode == 1:
 		prr := newPortToPathReduceRewriteReader(originHost, originProtocol, baseURI, p)
+		prr.ProcessRelativePath = urw.processRelativePath
 		bf := bytes.NewBuffer(nil)
 		_, err := io.Copy(bf, prr)
 

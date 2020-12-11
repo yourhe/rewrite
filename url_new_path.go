@@ -13,6 +13,7 @@ type pathReduceRewriteReader struct {
 	originProtocol        []byte
 	NotSetProtocolOnQuery bool
 	baseURI               []byte
+	ProcessRelativePath   bool
 	buf                   *bytes.Buffer
 }
 
@@ -123,6 +124,7 @@ type pathPortToReduceRewriteReader struct {
 	originProtocol        []byte
 	NotSetProtocolOnQuery bool
 	baseURI               []byte
+	ProcessRelativePath   bool
 	buf                   *bytes.Buffer
 }
 
@@ -171,6 +173,12 @@ func (prr *pathPortToReduceRewriteReader) Read(p []byte) (n int, err error) {
 
 	u.DisablePathNormalizing = true
 	if len(u.Host()) == 0 {
+		if !prr.ProcessRelativePath {
+			if prr.buf == nil {
+				prr.buf = bytes.NewBuffer(prr.src)
+			}
+			return prr.read(p)
+		}
 
 		var u2 fasthttp.URI
 		u2.Parse(nil, prr.baseURI)
@@ -185,8 +193,8 @@ func (prr *pathPortToReduceRewriteReader) Read(p []byte) (n int, err error) {
 				// https://navi.cnki.net/knavi/JournalDetail/GetArticleList?year=2020&issue=09&pykm=ZRZY&pageIdx=0&pcode=CJFD
 				// ！！！！！如需修改请考虑冲突
 
-				prr.buf = bytes.NewBuffer(prr.src)
-				return prr.read(p)
+				// prr.buf = bytes.NewBuffer(prr.src)
+				// return prr.read(p)
 				absolutePath := append(u2.PathOriginal(), '/', '.', '.', '/')
 				absolutePath = append(absolutePath, u.PathOriginal()...)
 				u.SetPathBytes(recodePath(absolutePath))

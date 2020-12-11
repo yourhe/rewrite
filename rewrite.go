@@ -13,6 +13,13 @@ var ErrNotFinished = errors.New("not finished")
 
 type BuildRewriteReader func(r io.Reader) io.Reader
 
+type RewriteFunc func([]byte) []byte
+
+// ServeHTTP calls f(w, r).
+func (f RewriteFunc) Rewrite(in []byte) (out []byte) {
+	return f(in)
+}
+
 // Rewriter takes an input byte slice of and returns an output
 // slice of rewritten bytes, the length of input & output will
 // not necessarily match, implementations *may* alter input bytes

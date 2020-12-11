@@ -2,6 +2,7 @@ package rewrite
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 
@@ -419,28 +420,86 @@ func (r *RewriteReader) SetHtmlRewriter(hrw *HtmlRewriter) *RewriteReader {
 	return r
 }
 
-func readAttrName(src string) (name string, regex *regexp.Regexp) {
+func readRegexStrEnd(str string) int {
+	i := strings.Index(str, "/")
+	if i < 1 {
+		return i
+	}
+	if str[i-1] == '\\' {
+		n := readRegexStrEnd(str[i+1:])
+		if n > -1 {
+			return i + n + 1
+		}
+		return -1
+	}
+	return i
+}
+
+func readAttrName(src string) (name string, regex *regexp.Regexp, rwfn Rewriter, err error) {
 	name = src
 	i := strings.Index(src, "/")
-	if i > -1 {
-		name = src[:i]
-		j := strings.LastIndex(src, "/")
-		rgStr := src[i+1 : j]
-		regex = regexp.MustCompile(rgStr)
+	if i > -1 { //has regext
+		j := readRegexStrEnd(src[i+1:])
+		if j > -1 {
+			name = src[:i]
+			rgStr := src[i+1 : i+1+j]
+			regex, err = regexp.Compile(rgStr)
+
+			r := readRegexStrEnd(src[i+1+j+1:])
+			if r > -1 { // has replace
+				replaceStr := src[i+1+j+1 : i+1+j+1+r]
+				rwfn = &RegexRewriter{
+					Re: regex,
+					Rw: RewriteFunc(func(in []byte) []byte {
+						return regex.ReplaceAll(in, []byte(replaceStr))
+						return []byte("-" + replaceStr + "-")
+					}),
+				}
+			}
+		}
+
+		// j := strings.LastIndex(src, "/")
+
 	}
+
+	// i = strings.Index(src, ":")
+	// if i > -1 && src[len(src)-1] == ':' {
+	// 	name = src[:i]
+	// 	j := strings.LastIndex(src, "/")
+	// 	rgStr := src[i+1 : j]
+	// 	regex, err = regexp.Compile(rgStr)
+	// 	rwfn = &RegexRewriter{
+	// 		Re: regex,
+	// 		Rw: RewriteFunc(func(in []byte) []byte {
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			fmt.Println(string(in))
+	// 			return in
+	// 		}),
+	// 	}
+	// 	return
+	// }
 	return
 }
 
 func (r *RewriteReader) SetTagRewriter(query, attrName string, rw Rewriter) *RewriteReader {
-	if query == "" || attrName == "" || rw == nil {
+	if query == "" || attrName == "" {
 		return r
 	}
-	attrName, regex := readAttrName(attrName)
+	attrName, regex, rwfn, err := readAttrName(attrName)
+	if err != nil {
+		fmt.Println(err, "SetTagRewriter")
+		return r
+	}
+	if rwfn != nil {
+		rw = rwfn
+	}
 	if r.tagTable == nil {
 		r.tagTable = map[string][]matcher{}
 	}
-
-	matchs := []match{match{key: attrName, rewrite: rw, regex: regex}}
+	// fmt.Println(rw)
+	matchs := []match{}
 	var tagName = query
 	i := strings.Index(query, "[")
 	if i > -1 {
@@ -465,6 +524,7 @@ func (r *RewriteReader) SetTagRewriter(query, attrName string, rw Rewriter) *Rew
 		}
 
 	}
+	matchs = append(matchs, match{key: attrName, rewrite: rw, regex: regex})
 
 	r.tagTable[tagName] = append(r.tagTable[tagName], matcher{
 		matchs: matchs,
@@ -727,12 +787,58 @@ func (r *RewriteReader) getTagRewriter(tagName string, attrName []byte) Rewriter
 
 }
 
+func (r *RewriteReader) queryTags2(token *html.Token) []Tags {
+	tag := r.tagTable[token.Data]
+	if tag == nil {
+		return nil
+	}
+	result := []Tags{}
+	for _, tagMatchs := range tag {
+		var matched = make([]bool, len(tagMatchs.matchs))
+		for i, matcher := range tagMatchs.matchs {
+			for j, attr := range token.Attr {
+				if attr.Key != matcher.key {
+					continue
+				}
+
+				if matcher.value != nil {
+
+					if attr.Val != *matcher.value {
+						continue
+					}
+
+				}
+
+				var rewriter *match
+				var idx int
+				if matcher.rewrite != nil {
+
+					rewriter = &tagMatchs.matchs[i]
+					idx = j
+				}
+				matched[i] = true
+				var e = true
+				for _, b := range matched {
+					e = e && b
+				}
+				if e {
+					result = append(result, Tags{
+						match: rewriter,
+						index: idx,
+					})
+				}
+			}
+
+		}
+	}
+	return result
+}
+
 func (r *RewriteReader) queryTags(token *html.Token) (rewriter *match, idx int) {
 	tag := r.tagTable[token.Data]
 	if tag == nil {
 		return nil, -1
 	}
-
 	for _, tagMatchs := range tag {
 		var matched = make([]bool, len(tagMatchs.matchs))
 		for i, matcher := range tagMatchs.matchs {
@@ -768,6 +874,11 @@ func (r *RewriteReader) queryTags(token *html.Token) (rewriter *match, idx int) 
 	return nil, -1
 }
 
+type Tags struct {
+	match *match
+	index int
+}
+
 func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 	// attrs := hrw.rewriteTags[t.Data]
 	// for {
@@ -785,43 +896,49 @@ func (r *RewriteReader) rewriteToken(t *html.Token, tok *html.Tokenizer) {
 	// 	}
 	// }
 
-	match, i := r.queryTags(t)
+	// match, i := r.queryTags(t)
+	matchs := r.queryTags2(t)
+	for _, item := range matchs {
+		match := item.match
+		i := item.index
+		if match != nil && i > -1 {
+			repl := match.rewrite
+			// fmt.Println(t)
+			if repl == nil {
+				return
+			}
+			val := []byte(t.Attr[i].Val)
+			newVal := val
+			if match.regex != nil {
+				findpart := match.regex.Copy().FindSubmatchIndex(val)
+				if len(findpart) > 0 {
+					i := findpart[2]
+					j := findpart[3]
+					bf := bytes.NewBuffer(val[:i])
+					bf.Write(repl.Rewrite(val[i:j]))
+					bf.Write(val[j:])
+					newVal = bf.Bytes()
 
-	if match != nil && i > -1 {
-		repl := match.rewrite
-		if repl == nil {
-			return
-		}
-		val := []byte(t.Attr[i].Val)
-		newVal := val
-		if match.regex != nil {
-			findpart := match.regex.Copy().FindSubmatchIndex(val)
-			if len(findpart) > 0 {
-				i := findpart[2]
-				j := findpart[3]
-				bf := bytes.NewBuffer(val[:i])
-				bf.Write(repl.Rewrite(val[i:j]))
-				bf.Write(val[j:])
-				newVal = bf.Bytes()
+				}
 
+			} else {
+				newVal = repl.Rewrite(val)
 			}
 
-		} else {
-			newVal = repl.Rewrite(val)
-		}
-
-		if bytes.Compare(newVal, val) != 0 {
-			t.Attr[i].Val = string(newVal)
-			t.Attr = append(t.Attr, html.Attribute{
-				Key: "__cpp",
-				Val: "1",
-			})
-			t.Attr = append(t.Attr, html.Attribute{
-				Key: "__dp",
-				Val: "1",
-			})
+			if bytes.Compare(newVal, bytes.TrimSpace(val)) != 0 {
+				t.Attr[i].Val = string(newVal)
+				t.Attr = append(t.Attr, html.Attribute{
+					Key: "__cpp",
+					Val: "1",
+				})
+				t.Attr = append(t.Attr, html.Attribute{
+					Key: "__dp",
+					Val: "1",
+				})
+			}
 		}
 	}
+
 	return
 	for {
 		key, oldval, more := tok.TagAttr()

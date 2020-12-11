@@ -93,6 +93,7 @@ var input = map[string]string{
 	"Www-Authenticate":                    "keep",
 	"X-Frame-Options":                     "prefix",
 	"X-Xss-Protection":                    "prefix",
+	"Refresh":                             "0;URL=http://a.com/index.php?s=member&c=login&m=index",
 }
 
 var output = map[string]string{
@@ -145,6 +146,7 @@ var output = map[string]string{
 	"Www-Authenticate":                         "keep",
 	"Test-X-Frame-Options":                     "prefix",
 	"Test-X-Xss-Protection":                    "prefix",
+	"Refresh":                                  "0;URL=https://b.tv/index.php?s=member&c=login&m=index",
 }
 
 func TestEEEeeee(t *testing.T) {

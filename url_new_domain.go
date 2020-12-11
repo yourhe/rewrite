@@ -100,6 +100,7 @@ func (drw *domainRewriteReader) Read(p []byte) (n int, err error) {
 					drw.buf = bytes.NewBuffer(drw.src)
 				}
 				return drw.read(p)
+
 			}
 		} else {
 			u.SetPathBytes(baseURI.PathOriginal())
@@ -226,8 +227,8 @@ func (drw *portToDomainRewriteReader) Read(p []byte) (n int, err error) {
 			case '/':
 
 			default:
-				drw.buf = bytes.NewBuffer(drw.src)
-				return drw.read(p)
+				// drw.buf = bytes.NewBuffer(drw.src)
+				// return drw.read(p)
 				// CNKI 某些相对路径的url不能重写。
 				// 例如
 				// https://navi.cnki.net/KNavi/JournalDetail?pcode=CJFD&pykm=ZRZY&Year=&Issue=
@@ -274,7 +275,6 @@ func (drw *portToDomainRewriteReader) Read(p []byte) (n int, err error) {
 			u.SetHostBytes(u.Host()[:i])
 		}
 	}
-
 	formatHost := formatHostBytes(u.Host(), []byte(PortPrefix), []byte{'.'})
 	formatHost = append(formatHost, '.')
 	u.SetHostBytes(append(formatHost, drw.originHost...))
