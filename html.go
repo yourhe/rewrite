@@ -412,6 +412,7 @@ func (rr *RewriteReader) NewReader(r io.Reader) io.Reader {
 	}
 
 	rr.tokenizer = html.NewTokenizer(r)
+	// rr.tokenizer = html.NewTokenizerFragment(r, "title")
 	return rr
 }
 
@@ -671,6 +672,7 @@ func (r *RewriteReader) Read(p []byte) (n int, err error) {
 loop:
 	tokenizer := r.tokenizer
 	tt := tokenizer.Next()
+	// fmt.Println(tt.String())
 	var raw []byte
 	switch tt {
 	case html.ErrorToken:
@@ -731,10 +733,16 @@ loop:
 		if hasAttr(&token) {
 			r.rewriteToken(&token, tokenizer)
 		}
-
+		if tt == html.SelfClosingTagToken {
+			tokenizer.NextIsNotRawText()
+			// raw = r.waitTagTokenClose(token, "script")
+			// raw = append(raw, r.ProcessInsert(token, tokenizer)...)
+		} else {
+			// fmt.Println("close", token)
+			// raw = append(raw, r.ProcessInsert(token, tokenizer)...)
+		}
 		raw = r.waitTagTokenClose(token, "script")
 		raw = append(raw, r.ProcessInsert(token, tokenizer)...)
-
 		r.buf.Write(raw)
 		// fmt.Println("****", string(r.buf.String()))
 		// raw = r.insert(token, "head", "<base href='http://www.baidu.com'></base>")
@@ -1063,6 +1071,7 @@ func (r *RewriteReader) processInsert(tz html.Token, tokenizer *html.Tokenizer, 
 		return nil //r.getRawDataFromToken(tz)
 	}
 	var insertRaw []byte
+
 	for _, insert := range r.inserts {
 
 		// if !insert.NotOnce && insert.matched {
@@ -1108,7 +1117,7 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 		case html.StartTagToken:
 			r.stack.Push(String(tz))
 			break
-		case html.EndTagToken:
+		case html.EndTagToken, html.SelfClosingTagToken:
 			last, ok := r.stack.Pop().(string)
 
 			var bs *bytes.Buffer

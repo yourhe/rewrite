@@ -380,3 +380,16 @@ func Test_readRegexStrEnd(t *testing.T) {
 }
 
 // <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'unsafe-inline' 'unsafe-eval' 'self' *.zhangyue.com *.ireader.com *.zhangyue01.com *.163yun.com *.163.com localhost *.126.net *.126.com *.netease.com *.qq.com *.gtimg.cn *.baidu.com *.bdstatic.com *.hicloud.com *.baidustatic.com; style-src * 'unsafe-inline'; img-src * data: ; frame-src 'self' *.zhangyue.com *.zhangyue01.com *.ireader.com *.alipay.com *.gtimg.cn *.qq.com *.baidu.com zhangyueireader: weixin:;"/>
+
+func TestOnlinelibraryWileyPDFPage(t *testing.T) {
+	f, _ := os.Open("./testdata/onlinelibrary-pdfpage.xhtml")
+	defer f.Close()
+	r := NewRewriteReader(f)
+	urlRewrite := NewURLRewriterRelativePath("http://x.cnki.net", "iyoerhe.com", "https", false, 1)
+	r.SetTagRewriter(`script`, "src", urlRewrite)
+	r.SetTagRewriter(`link`, "href", urlRewrite)
+
+	var b []byte
+	b, _ = ioutil.ReadAll(r)
+	fmt.Println(string(b))
+}
