@@ -755,19 +755,14 @@ loop:
 		raw = r.ProcessInsertAfter(token, tokenizer)
 
 		raw = append(raw, r.waitTagTokenClose(token, "script")...)
-
 		r.buf.Write(raw)
 	// case html.TextToken:
 	// 	raw = tokenizer.Raw()
 	// 	r.buf.Write(raw)
 	case html.CommentToken, html.DoctypeToken:
-		// fmt.Println(string(tokenizer.Raw()))
 		r.buf.Write(tokenizer.Raw())
 	default:
-		// fmt.Println(string(tokenizer.Raw()))
-
 		raw = r.waitTagTokenzerClose(tokenizer, "script")
-		// raw = tokenizer.Raw()
 		r.buf.Write(raw)
 
 	}
@@ -1151,9 +1146,14 @@ func (r *RewriteReader) waitTagTokenClose(tz html.Token, tagName string) (raw []
 			switch tz.Type {
 			case html.TextToken:
 				if tagName == "script" && r.jsRewriter != nil {
-					jsBuf := bytes.NewReader([]byte(tz.Data))
+					data := strings.Replace(tz.Data, "<!--", "//<!--", -1)
+					jsBuf := bytes.NewReader([]byte(data))
+					// fmt.Println(tz.Data)
+
 					r.jsRewriter.NewReader(jsBuf)
+					io.Copy(bs, bytes.NewBufferString("(function(window){"))
 					io.Copy(bs, r.jsRewriter)
+					io.Copy(bs, bytes.NewBufferString("})(window)"))
 				} else {
 					bs.WriteString(tz.Data)
 				}

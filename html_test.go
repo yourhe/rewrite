@@ -393,3 +393,58 @@ func TestOnlinelibraryWileyPDFPage(t *testing.T) {
 	b, _ = ioutil.ReadAll(r)
 	fmt.Println(string(b))
 }
+
+func TestRewriteNotProtocol(t *testing.T) {
+	var raw = `<script src="//www.baidu.com">a</script>
+	<script src="//g.alicdn.com/sd/smartCaptcha/0.0.1/index.js"></script>`
+	f := bytes.NewBufferString(raw)
+	r := NewRewriteReader(f)
+	urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 0)
+
+	r.SetTagRewriter(`a`, "href", urlRewrite)
+	r.SetTagRewriter(`script`, "src", urlRewrite)
+	b, err := ioutil.ReadAll(r)
+	fmt.Println(string(b), err)
+}
+
+func TestRewriteJavascriptCommentToken(t *testing.T) {
+	var raw = `<script language=javascript>
+	<!--
+	function openProgressBar(url)
+	{
+			var ary = document.getElementsByTagName('INPUT');
+			var openBar = false;
+			for(var i=0;i<ary.length;i++)
+			{
+				var obj = ary[i];
+				if(obj.type  == 'file')
+				{
+					if(obj.value != '')
+					{
+						openBar = true;
+						break;
+					}
+				}
+			}
+			if(openBar)
+			{
+				var swd = window.screen.availWidth;
+				var sht = window.screen.availHeight;
+				var wd = 400;
+				var ht =200;
+				var left = (swd-wd)/2;
+				var top = (sht-ht)/2;
+				window.open(url,'_blank','status=1,toolbar=0,menubar=0,location=0,height='+ht+',width='+wd+',left='+left+',top='+top);
+			}
+	}
+	//-->
+	</script>`
+	f := bytes.NewBufferString(raw)
+	r := NewRewriteReader(f)
+	urlRewrite := NewURLRewriter("http://dx.doi.org", "iyoerhe.com", "https", true, 0)
+	r.SetJavascriptRewriter(NewJavaScriptRewrite())
+	r.SetTagRewriter(`a`, "href", urlRewrite)
+	r.SetTagRewriter(`script`, "src", urlRewrite)
+	b, err := ioutil.ReadAll(r)
+	fmt.Println(string(b), err)
+}

@@ -153,8 +153,10 @@ func DecodeHost(host, perfix, s string) string {
 		return host
 	}
 	strPort := host[len(perfix):idx]
-	if strPort != "" {
+	if strPort != "" && strPort != "80" && strPort != "443" {
 		strPort = ":" + strPort
+	} else {
+		strPort = ""
 	}
 	// port,_ := strconv.Atoi(strPort)
 	return fmt.Sprintf("%s%s", host[idx+1:], strPort)

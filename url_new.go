@@ -43,10 +43,10 @@ func (urw *URLRewriter) Rewrite(p []byte) (o []byte) {
 	if len(p) == 0 {
 		return p
 	}
-	if bytes.Index(p, []byte("g.alicdn.com")) > -1 ||
-		bytes.Index(p, []byte("www.recaptcha.net")) > -1 {
-		return p
-	}
+	// if bytes.Index(p, []byte("g.alicdn.com")) > -1 ||
+	// 	bytes.Index(p, []byte("www.recaptcha.net")) > -1 {
+	// 	return p
+	// }
 
 	originHost := []byte(urw.host)
 	originProtocol := []byte(urw.protocol)
